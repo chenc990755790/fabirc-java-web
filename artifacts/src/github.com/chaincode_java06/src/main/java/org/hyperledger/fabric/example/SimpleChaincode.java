@@ -14,6 +14,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperledger.fabric.example.entity.Enterprise;
 import org.hyperledger.fabric.shim.ChaincodeBase;
 import org.hyperledger.fabric.shim.ChaincodeStub;
+import org.hyperledger.fabric.shim.ledger.KeyValue;
+import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,9 +23,13 @@ import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+//import org.json.JSONArray;
+
 public class SimpleChaincode extends ChaincodeBase {
 
     private static final String FUNCTION_QUERY = "query";
+
+    private static final String FUNCTION_RICH_QUERY = "richQuery";
 
     private static final String FUNCTION_SAVEENTERPRISE = "saveEnterprise";
 
@@ -37,7 +43,7 @@ public class SimpleChaincode extends ChaincodeBase {
 
     private static final String FUNCTION_DELETEPRIVATE = "delPrivate";
 
-    private static final String FUNCTION_QUERYPRIVATE = "queryPrivate";
+    private static final String FUNCTION_QUERYPRIVATE="queryPrivate";
 
     private static Log _logger = LogFactory.getLog(SimpleChaincode.class);
     private final Gson gson = new GsonBuilder().create();
@@ -77,6 +83,10 @@ public class SimpleChaincode extends ChaincodeBase {
             if (FUNCTION_QUERY.equals(func)) {
                 params.remove(0);
                 return query(stub, params);
+            }
+            if (FUNCTION_RICH_QUERY.equals(func)) {
+                params.remove(0);
+                return richQuery(stub, params);
             }
             if (FUNCTION_DELETEENTERPRISE.equals(func)) {
                 params.remove(0);
@@ -131,13 +141,13 @@ public class SimpleChaincode extends ChaincodeBase {
             return newErrorResponse("Incorrect number of arguments. Expecting 1");
         }
         _logger.info("args  parameter is" + args.get(0));
-        Enterprise enterprise = gson.fromJson(args.get(0), Enterprise.class);
+        Enterprise enterprise = gson.fromJson(args.get(0),Enterprise.class);
         _logger.info("conversion  Enterprise is" + enterprise);
-        String key = enterprise.getObjectType() + enterprise.getId();
+        String key = enterprise.getObjectType()+enterprise.getId();
         stub.putStringState(key, args.get(0));
         _logger.info("Transfer complete" + key);
 
-        return newSuccessResponse("invoke finished successfully:", ByteString.copyFrom(key, UTF_8).toByteArray());
+        return newSuccessResponse("invoke finished successfully:" , ByteString.copyFrom(key,UTF_8).toByteArray());
     }
 
 
@@ -165,6 +175,30 @@ public class SimpleChaincode extends ChaincodeBase {
         return newSuccessResponse(val, ByteString.copyFrom(val, UTF_8).toByteArray());
     }
 
+    private Response richQuery(ChaincodeStub stub, List<String> args) {
+        if (args.size() != 2) {
+            _logger.info("params size :" + args.size());
+            return newErrorResponse("Incorrect number of arguments. Expecting name of the person to query:" + args.toString());
+        }
+        String queryString = String.format("{\"selector\":{\"%s\":\"%s\"}}", args.get(0), args.get(1));
+        _logger.info("rich query string is :" + queryString);
+        QueryResultsIterator<KeyValue> values = stub.getQueryResult(queryString);
+        if (values == null) {
+            return newErrorResponse(String.format("Error: KeyValue state for %s is null", queryString));
+        }
+        Iterator <KeyValue> iterator = values.iterator();
+        StringBuilder sb = new StringBuilder("[");
+        while (iterator.hasNext()){
+            KeyValue keyValue = iterator.next();
+            sb.append(keyValue.getStringValue());
+            sb.append(",");
+        }
+        sb.deleteCharAt(sb.length()-1);
+        sb.append("]");
+        _logger.info(String.format("Query Response:\nKey: %s, Value: %s\n", queryString, sb.toString()));
+        return newSuccessResponse(sb.toString(), ByteString.copyFrom(sb.toString(), UTF_8).toByteArray());
+    }
+
     private Response queryEnterprise(ChaincodeStub stub, List<String> args) {
         if (args.size() != 1) {
             _logger.info("params size :" + args.size());
@@ -172,7 +206,8 @@ public class SimpleChaincode extends ChaincodeBase {
         }
         String key = args.get(0);
         //byte[] stateBytes
-        String val = stub.getStringState(key);
+        String val = stub.getStringState( key);
+        QueryResultsIterator<KeyValue>  iterator =  stub.getQueryResult("");
         if (val == null) {
             return newErrorResponse(String.format("Error: state for %s is null", key));
         }
@@ -201,6 +236,7 @@ public class SimpleChaincode extends ChaincodeBase {
 
     public static void main(String[] args) {
         System.out.println("OpenSSL avaliable: " + OpenSsl.isAvailable());
+//        args = new String[]{"peerAddress","i"};
         new SimpleChaincode().start(args);
     }
 
