@@ -140,4 +140,15 @@ public class FabricCaUserServiceImpl {
             return false;
         }
     }
+
+    public void updateUserCollectionName(String name,String collectionName){
+        Map<String,Object> parameters = new HashMap<>();
+        parameters.put("name",name);
+        parameters.put("collectionName",collectionName);
+        fabricCaUserMapper.updateCollectionName(parameters);
+    }
+
+    public String getCollectionName(String name) {
+        return fabricCaUserMapper.getCollectionName(name);
+    }
 }

@@ -42,7 +42,7 @@ public class Config {
 
 	private static final String PROPBASE = "config.";
 	private static String PATH = System.getProperty("user.dir");
-	
+
 
 	private static final String GOSSIPWAITTIME = PROPBASE + "GossipWaitTime";
 	private static final String INVOKEWAITTIME = PROPBASE + "InvokeWaitTime";
@@ -75,7 +75,7 @@ public class Config {
 
 			sdkProperties.load(new FileInputStream(PATH + "/config.properties"));
 
-			
+
 
 		} catch (IOException e) {
 			// if not there no worries just use defaults
@@ -149,9 +149,9 @@ public class Config {
 //				}
 
 				sampleOrg.setCALocation(httpTLSify(sdkProperties.getProperty((ORGS + org.getKey() + ".ca_location"))));
-
+				sampleOrg.setCAName(sdkProperties.getProperty(ORGS + orgName + ".ca_name"));
 				if (true) {
-					String cert = "artifacts/channel/crypto-config/peerOrganizations/DNAME/ca/ca.DNAME-cert.pem"
+					String cert = "artifacts/ccchannel/crypto-config/peerOrganizations/DNAME/ca/ca.DNAME-cert.pem"
 							.replaceAll("DNAME", domainName);
 					File cf = new File(cert);
 					if (!cf.exists() || !cf.isFile()) {
@@ -311,7 +311,7 @@ public class Config {
 //		} catch (IOException e1) {
 //			e1.printStackTrace();
 //		}
-		return PATH+"/artifacts/channel";
+		return PATH+"/artifacts/ccchannel";
 
 	}
 

@@ -32,6 +32,15 @@ public class Org {
     final String name;
     final String mspid;
     HFCAClient caClient;
+    private String cAName;
+
+    public String getCAName() {
+        return cAName;
+    }
+
+    public void setCAName(String cAName) {
+        this.cAName = cAName;
+    }
 
     Map<String, User> userMap = new HashMap<>();
     Map<String, String> peerLocations = new HashMap<>();

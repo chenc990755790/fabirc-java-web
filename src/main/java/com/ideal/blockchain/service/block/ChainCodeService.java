@@ -32,7 +32,7 @@ public class ChainCodeService {
     @Autowired
     private ChannelService channelService;
 
-    Type CHAIN_CODE_LANG = Type.GO_LANG;
+    Type CHAIN_CODE_LANG = Type.JAVA;
 
     private void waitOnFabric(int additional) {
 
@@ -56,7 +56,8 @@ public class ChainCodeService {
         log.info("Creating install proposal");
         InstallProposalRequest installProposalRequest = client.newInstallProposalRequest();
         installProposalRequest.setChaincodeID(chaincodeID);
-        installProposalRequest.setChaincodeSourceLocation(new File(HyperledgerConfiguration.PATH + "/artifacts/"));
+        installProposalRequest.setChaincodeSourceLocation(new File(HyperledgerConfiguration.PATH
+                + "/artifacts/src/github.com/chaincode_java06"));
         installProposalRequest.setChaincodeVersion(chainCodeVersion);
         installProposalRequest.setChaincodeLanguage(CHAIN_CODE_LANG);
         installProposalRequest.setUserContext(sampleOrg.getPeerAdmin());
@@ -206,7 +207,7 @@ public class ChainCodeService {
 
         TransactionProposalRequest transactionProposalRequest = client.newTransactionProposalRequest();
         transactionProposalRequest.setChaincodeID(chaincodeID);
-        transactionProposalRequest.setChaincodeLanguage(Type.GO_LANG);
+        transactionProposalRequest.setChaincodeLanguage(CHAIN_CODE_LANG);
         transactionProposalRequest.setFcn(chaincodeFunction);
         transactionProposalRequest.setProposalWaitTime(HyperledgerConfiguration.config.getProposalWaitTime());
         transactionProposalRequest.setArgs(chaincodeArgs);
@@ -338,7 +339,7 @@ public class ChainCodeService {
         queryByChaincodeRequest.setFcn(chaincodeFunction);
         queryByChaincodeRequest.setChaincodeID(chaincodeID);
         queryByChaincodeRequest.setChaincodeVersion(chainCodeVersion);
-        queryByChaincodeRequest.setChaincodeLanguage(Type.GO_LANG);
+        queryByChaincodeRequest.setChaincodeLanguage(CHAIN_CODE_LANG);
         queryByChaincodeRequest.setUserContext(HyperledgerConfiguration.config.getSampleOrg(peerWithOrg).getUser(name));
 
         Map<String, byte[]> tm2 = new HashMap<>();

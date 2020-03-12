@@ -34,7 +34,12 @@ public class UserController {
             if (StringUtils.isEmpty(user.getPeerWithOrg())) {
                 return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter peerWithOrg in request body");
             }
-            String result = userService.register(user.getUserName(), user.getPassWord(), user.getPeerWithOrg());
+            String result;
+            if (StringUtils.isEmpty(user.getCollectionName())) {
+                 result = userService.register(user.getUserName(), user.getPassWord(), user.getPeerWithOrg());
+            } else {
+                result = userService.register(user.getUserName(), user.getPassWord(), user.getPeerWithOrg(),user.getCollectionName());
+            }
             return new ResultInfo(ResponseCodeEnum.SUCCESS, result);
 
         } catch (Exception e) {

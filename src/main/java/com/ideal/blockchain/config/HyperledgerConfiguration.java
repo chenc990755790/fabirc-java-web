@@ -96,7 +96,7 @@ public class HyperledgerConfiguration {
     }
 
     public ChaincodeID getChaincodeId(String chaincodeName, String chainCodeVersion) {
-        ChaincodeID chaincodeID = ChaincodeID.newBuilder().setName(chaincodeName).setVersion(chainCodeVersion).setPath(chainCodePath + "/" + chaincodeName)
+        ChaincodeID chaincodeID = ChaincodeID.newBuilder().setName(chaincodeName).setVersion(chainCodeVersion)//.setPath(chainCodePath + "/" + chaincodeName)
                 .build();
         return chaincodeID;
     }

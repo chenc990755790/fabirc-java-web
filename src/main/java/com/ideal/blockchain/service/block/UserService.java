@@ -8,6 +8,7 @@ import com.ideal.blockchain.model.Org;
 import com.ideal.blockchain.model.SampleStoreEnrollement;
 import com.ideal.blockchain.model.Utils;
 import com.ideal.blockchain.service.FabricCaUserServiceImpl;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.hyperledger.fabric.sdk.Enrollment;
@@ -41,13 +42,21 @@ public class UserService {
     @Autowired
     private HyperledgerConfiguration hyperledgerConfiguration;
 
+    public synchronized String register(String name, String password, String peerWithOrg, String collectionName) throws Exception {
+        register(name, password, peerWithOrg);
+        if (StringUtils.isNotEmpty(collectionName)) {
+            fabricCaUserService.updateUserCollectionName(name, collectionName);
+        }
+        return "User " + name + " enroll Successfully";
+    }
 
     public synchronized String register(String name, String password, String peerWithOrg) throws Exception {
         HFClient client = HFClient.createNewInstance();
         hyperledgerConfiguration.checkConfig(client);
 
         Org sampleOrg = HyperledgerConfiguration.config.getSampleOrg(peerWithOrg);
-        HFCAClient ca = sampleOrg.getCAClient();
+        HFCAClient ca =  HFCAClient.createNewInstance(sampleOrg.getCAName(), sampleOrg.getCALocation(), sampleOrg.getCAProperties());
+                //sampleOrg.getCAClient();
 
         String orgName = sampleOrg.getName();
         String msPid = sampleOrg.getMSPID();
@@ -200,5 +209,9 @@ public class UserService {
         }
 
         return "Successfully loaded member from persistence";
+    }
+    public String getCollectionName(String name) {
+        String col_name = fabricCaUserService.getCollectionName(name);
+        return StringUtils.isEmpty(col_name) ? "" : col_name;
     }
 }

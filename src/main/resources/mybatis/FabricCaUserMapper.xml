@@ -24,7 +24,7 @@
     <!--
       WARNING - @mbg.generated
     -->
-    id, name, roles, account, affiliation, organization, enrollmentSecret, enrollment, 
+    id, name, roles, account, affiliation, organization, enrollmentSecret, enrollment,
     msp_Id, exp_date, create_by, create_date, update_by, update_date
   </sql>
 
@@ -48,7 +48,16 @@
 
   </select>
 
+  <update id="updateCollectionName" parameterType="java.util.Map">
+    update fabric_ca_user
+    set collection_name = #{collectionName}
+    where name=#{name}
+  </update>
 
+  <select id="getCollectionName" resultType="java.lang.String" parameterType="java.lang.String">
+    select collection_name from fabric_ca_user
+    where name=#{name}
+  </select>
 
 
 </mapper>

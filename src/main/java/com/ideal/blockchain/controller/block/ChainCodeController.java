@@ -1,6 +1,7 @@
 package com.ideal.blockchain.controller.block;
 
 import com.ideal.blockchain.config.ChannelContext;
+import com.ideal.blockchain.controller.BaseController;
 import com.ideal.blockchain.dto.request.ChaincodeNameDto;
 import com.ideal.blockchain.dto.request.FunctionAndArgsDto;
 import com.ideal.blockchain.dto.request.InvokeChainCodeArgsDto;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/chaincode")
-public class ChainCodeController {
+public class ChainCodeController extends BaseController {
 
     @Autowired
     private ChainCodeService chainCodeService;
@@ -296,8 +297,9 @@ public class ChainCodeController {
 
             String result = userService.loadUserFromPersistence(uname, chaincodeDto.getPassWord(), chaincodeDto.getPeerWithOrg());
             if (result == "Successfully loaded member from persistence") {
+                String[] strings = addArgsForCollectionName(userService.getCollectionName(uname),chaincodeDto.getArgs());
                 String response = chainCodeService.queryChainCode(uname, chaincodeDto.getPeerWithOrg(), chaincodeDto.getChannelName(),
-                        chaincodeDto.getChainCodeName(), chaincodeDto.getFunction(), chaincodeDto.getArgs(), chaincodeDto.getChainCodeVersion());
+                        chaincodeDto.getChainCodeName(), chaincodeDto.getFunction(), strings, chaincodeDto.getChainCodeVersion());
                 if (response != "Caught an exception while quering chaincode") {
                     return new ResultInfo(ResponseCodeEnum.SUCCESS, response);
                 } else {

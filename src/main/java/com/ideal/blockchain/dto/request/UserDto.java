@@ -12,37 +12,18 @@
  */
 package com.ideal.blockchain.dto.request;
 
+import lombok.Data;
+
 /**
  * @author SWATI RAJ
  *
  */
+@Data
 public class UserDto {
-	
+
 	private String userName;
 	private String passWord;
 	private String peerWithOrg;
 
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public String getPassWord() {
-		return passWord;
-	}
-
-	public void setPassWord(String passWord) {
-		this.passWord = passWord;
-	}
-
-	public String getPeerWithOrg() {
-		return peerWithOrg;
-	}
-
-	public void setPeerWithOrg(String peerWithOrg) {
-		this.peerWithOrg = peerWithOrg;
-	}
+	private String collectionName;
 }
