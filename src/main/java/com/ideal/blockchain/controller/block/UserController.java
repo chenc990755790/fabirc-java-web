@@ -1,13 +1,23 @@
 package com.ideal.blockchain.controller.block;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.ideal.blockchain.controller.BaseController;
 import com.ideal.blockchain.dto.request.UserDto;
 import com.ideal.blockchain.dto.response.ResultInfo;
+import com.ideal.blockchain.entity.UserInfo;
 import com.ideal.blockchain.enums.ResponseCodeEnum;
+import com.ideal.blockchain.req.EnterpriseReq;
+import com.ideal.blockchain.req.InvokeChainCodeArgsReq;
+import com.ideal.blockchain.req.UserInfoReq;
 import com.ideal.blockchain.service.block.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 /**
  * @author: LeonMa
@@ -16,7 +26,9 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/user")
-public class UserController {
+public class UserController extends BaseController {
+
+    private final Gson gson = new GsonBuilder().create();
 
     @Autowired
     private UserService userService;
@@ -48,4 +60,27 @@ public class UserController {
             return new ResultInfo(ResponseCodeEnum.FAILURE, e.getMessage());
         }
     }
+
+    @RequestMapping(value = "/saveUserInfo", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultInfo saveUserInfo(@RequestBody @Validated UserInfoReq req) {
+        String userInfoJson = gson.toJson(req.getUserInfo());
+        String[] newArgs = new String[] {userInfoJson};
+        return invokeChainCode(req, newArgs);
+    }
+
+    @RequestMapping(value = "/modifyUserInfo", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultInfo modifyUserInfo(@RequestBody @Valid UserInfoReq req) {
+        String userInfoJson = gson.toJson(req.getUserInfo());
+        String[] newArgs = new String[] {userInfoJson};
+        return invokeChainCode(req, newArgs);
+    }
+
+    @RequestMapping(value = "/deleteUserInfo", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultInfo deleteUserInfo(@RequestBody @Valid InvokeChainCodeArgsReq req) {
+        return invokeChainCode(req);
+    }
+
 }

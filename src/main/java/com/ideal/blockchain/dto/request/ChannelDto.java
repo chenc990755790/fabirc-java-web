@@ -1,6 +1,8 @@
 package com.ideal.blockchain.dto.request;
 
-public class ChannelDto extends BaseDto{
+import com.ideal.blockchain.req.BaseReq;
+
+public class ChannelDto extends BaseReq {
 
 
 

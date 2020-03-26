@@ -12,11 +12,13 @@
  */
 package com.ideal.blockchain.dto.request;
 
+import com.ideal.blockchain.req.BaseReq;
+
 /**
  * @author SWATI RAJ
  *
  */
-public class FunctionAndArgsDto extends BaseDto{
+public class FunctionAndArgsDto extends BaseReq {
 
 
 	private String belongWithOrg;

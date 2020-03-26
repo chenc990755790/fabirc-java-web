@@ -2,19 +2,21 @@ package com.ideal.blockchain.controller.block;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.ideal.blockchain.config.ChannelContext;
 import com.ideal.blockchain.controller.BaseController;
-import com.ideal.blockchain.dto.request.EnterpriseReq;
-import com.ideal.blockchain.dto.request.InvokeChainCodeArgsDto;
+import com.ideal.blockchain.req.InvokeChainCodeArgsReq;
 import com.ideal.blockchain.dto.response.ResultInfo;
-import com.ideal.blockchain.entity.Enterprise;
-import com.ideal.blockchain.enums.ResponseCodeEnum;
-import com.ideal.blockchain.service.block.ChainCodeService;
-import com.ideal.blockchain.service.block.UserService;
+import com.ideal.blockchain.req.EnterpriseReq;
+import com.ideal.blockchain.req.InvoiceInfoReq;
+import com.ideal.blockchain.req.SettlementAccountReq;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @Slf4j
 @RestController
@@ -23,66 +25,70 @@ public class EnterpriseController extends BaseController {
 
     private final Gson gson = new GsonBuilder().create();
 
-    @Autowired
-    private ChainCodeService chainCodeService;
-
-    @Autowired
-    private UserService userService;
-
-    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    @RequestMapping(value = "/saveEnterprise", method = RequestMethod.POST)
     @ResponseBody
-    public ResultInfo invokeChaincode(@RequestBody EnterpriseReq chaincodeDto) {
-        try {
-            if (StringUtils.isEmpty(chaincodeDto.getUserName())) {
-                return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter username in reques body!");
-            }
-//            if (StringUtils.isEmpty(chaincodeDto.getPassWord())) {
-//                return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter passwords in request body");
-//            }
-            if ((chaincodeDto.getFunction()) == null) {
-                return new ResultInfo(ResponseCodeEnum.FAILURE, "function not present in method body");
-            }
-
-            if ((chaincodeDto.getPeerWithOrgs()) == null || chaincodeDto.getPeerWithOrgs().length == 0) {
-                return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter peerWithOrgs in request body");
-            }
-            if (StringUtils.isEmpty(chaincodeDto.getBelongWithOrg())) {
-                return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter peerWithOrg in request body");
-            }
-            if (StringUtils.isEmpty(chaincodeDto.getChannelName())) {
-                return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter channelName in request body");
-            }
-            if (StringUtils.isEmpty(chaincodeDto.getChainCodeName())) {
-                return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter ChainCodeName in request body");
-            }
-            if (StringUtils.isEmpty(chaincodeDto.getChainCodeVersion())) {
-                return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter ChainCodeVersion in request body");
-            }
-            if (chaincodeDto.getEnterprise() == null) {
-                return new ResultInfo(ResponseCodeEnum.FAILURE, "args not present in method body");
-            }
-            String uname = chaincodeDto.getUserName();
-            String result = userService.loadUserFromPersistence(uname, chaincodeDto.getPassWord(), chaincodeDto.getBelongWithOrg());
-            if (result == "Successfully loaded member from persistence") {
-                Enterprise enterprise = chaincodeDto.getEnterprise();
-                String entergson = gson.toJson(enterprise);
-                String[] newArgs = addArgsForCollectionName(userService.getCollectionName(uname), new String[]{entergson});
-                String response = chainCodeService.invokeChaincode(uname, chaincodeDto.getBelongWithOrg(), chaincodeDto.getPeerWithOrgs(), chaincodeDto.getChannelName(),
-                        chaincodeDto.getChainCodeName(), chaincodeDto.getFunction(), newArgs, chaincodeDto.getChainCodeVersion());
-                if (response == "Transaction invoked successfully") {
-                    return new ResultInfo(ResponseCodeEnum.SUCCESS, response);
-                } else {
-                    return new ResultInfo(ResponseCodeEnum.FAILURE, response);
-                }
-            } else {
-                return new ResultInfo(ResponseCodeEnum.FAILURE, "Something went wrong");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error(e.getMessage());
-            return new ResultInfo(ResponseCodeEnum.FAILURE, e.getMessage());
-        } finally {
-            ChannelContext.clear();
-        }
+    public ResultInfo saveEnterprise(@RequestBody @Validated EnterpriseReq req) {
+        String enterpriseJson = gson.toJson(req.getEnterprise());
+        String[] newArgs = new String[] {enterpriseJson};
+        return invokeChainCode(req, newArgs);
     }
+
+    @RequestMapping(value = "/modifyEnterprise", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultInfo modifyEnterprise(@RequestBody @Valid EnterpriseReq req) {
+        String enterpriseJson = gson.toJson(req.getEnterprise());
+        String[] newArgs = new String[] {enterpriseJson};
+        return invokeChainCode(req, newArgs);
+    }
+
+    @RequestMapping(value = "/deleteEnterprise", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultInfo deleteEnterprise(@RequestBody @Valid InvokeChainCodeArgsReq req) {
+        return invokeChainCode(req);
+    }
+
+    @RequestMapping(value = "/saveInvoice", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultInfo saveInvoiceInfo(@RequestBody @Valid InvoiceInfoReq req) {
+        String invoiceJson = gson.toJson(req.getInvoiceInfo());
+        String[] newArgs = new String[] {invoiceJson};
+        return invokeChainCode(req, newArgs);
+    }
+
+    @RequestMapping(value = "/modifyInvoice", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultInfo modifyInvoiceInfo(@RequestBody @Valid InvoiceInfoReq req) {
+        String invoiceJson = gson.toJson(req.getInvoiceInfo());
+        String[] newArgs = new String[] {invoiceJson};
+        return invokeChainCode(req, newArgs);
+    }
+
+    @RequestMapping(value = "/deleteInvoice", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultInfo deleteInvoiceInfo(@RequestBody @Valid InvokeChainCodeArgsReq req) {
+        return invokeChainCode(req);
+    }
+
+    @RequestMapping(value = "/saveBankAccount", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultInfo saveBankAccount(@RequestBody @Valid SettlementAccountReq req) {
+        String bankAccountJson = gson.toJson(req.getSettlementAccount());
+        String[] newArgs = new String[] {bankAccountJson};
+        return invokeChainCode(req, newArgs);
+    }
+
+    @RequestMapping(value = "/modifyBankAccount", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultInfo modifyBankAccount(@RequestBody @Valid SettlementAccountReq req) {
+        String bankAccountJson = gson.toJson(req.getSettlementAccount());
+        String[] newArgs = new String[] {bankAccountJson};
+        return invokeChainCode(req, newArgs);
+    }
+
+    @RequestMapping(value = "/deleteBankAccount", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultInfo deleteBankAccount(@RequestBody @Valid InvokeChainCodeArgsReq req) {
+        return invokeChainCode(req);
+    }
+
 }

@@ -60,4 +60,7 @@
   </select>
 
 
+  <select id="getCompanyIdByName" resultType="java.lang.String" parameterType="java.lang.String">
+      select company_id from fabric_ca_user where name =#{name}
+  </select>
 </mapper>

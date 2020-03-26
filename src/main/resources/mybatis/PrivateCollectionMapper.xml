@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ideal.blockchain.dao.mapper.PrivateCollectionMapper">
+  <resultMap id="BaseResultMap" type="com.ideal.blockchain.dao.model.CollectionEntity">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="collection_name" jdbcType="VARCHAR" property="collectionName" />
+    <result column="sign_in_company" jdbcType="VARCHAR" property="signinCompany" />
+    <result column="sign_out_company" jdbcType="VARCHAR" property="signoutCompany" />
+    <result column="financial_company" jdbcType="VARCHAR" property="financialCompany" />
+    <result column="promise_company" jdbcType="VARCHAR" property="promiseCompany" />
+
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    id, collection_name, sign_in_company, sign_out_company, financial_company, promise_company
+  </sql>
+
+
+  <update id="updateByCollectionName" parameterType="com.ideal.blockchain.dao.model.CollectionEntity">
+      update collection_config
+      <set>
+        <if test="signinCompany!=null">
+          sign_in_company=#{signinCompany},
+        </if>
+        <if test="signoutCompany!=null">
+          sign_out_company = #{signoutCompany},
+        </if>
+        <if test="financialCompany!=null">
+          financial_company=#{financial_company},
+        </if>
+        <if test="promiseCompany!=null">
+          promise_company=#{promiseCompany},
+        </if>
+      </set>
+      where collection_name=#{collectionName}
+  </update>
+
+
+  <select id="getCollectionNameList" resultType="java.lang.String" parameterType="java.lang.String">
+      select  collection_name  from collection_config where sign_in_company = #{companyId}
+      or sign_out_company =#{companyId} or financial_company = #{companyId} or promise_company = #{companyId}
+  </select>
+</mapper>

@@ -151,4 +151,8 @@ public class FabricCaUserServiceImpl {
     public String getCollectionName(String name) {
         return fabricCaUserMapper.getCollectionName(name);
     }
+
+    public String getCompanyIdByName(String name){
+        return fabricCaUserMapper.getCompanyIdByName(name);
+    }
 }

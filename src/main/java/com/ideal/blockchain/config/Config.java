@@ -151,7 +151,7 @@ public class Config {
 				sampleOrg.setCALocation(httpTLSify(sdkProperties.getProperty((ORGS + org.getKey() + ".ca_location"))));
 				sampleOrg.setCAName(sdkProperties.getProperty(ORGS + orgName + ".ca_name"));
 				if (true) {
-					String cert = "artifacts/ccchannel/crypto-config/peerOrganizations/DNAME/ca/ca.DNAME-cert.pem"
+					String cert = "artifacts/cc1.4/crypto-config/peerOrganizations/DNAME/ca/ca.DNAME-cert.pem"
 							.replaceAll("DNAME", domainName);
 					File cf = new File(cert);
 					if (!cf.exists() || !cf.isFile()) {
@@ -311,7 +311,7 @@ public class Config {
 //		} catch (IOException e1) {
 //			e1.printStackTrace();
 //		}
-		return PATH+"/artifacts/ccchannel";
+		return PATH+"/artifacts/cc1.4";
 
 	}
 

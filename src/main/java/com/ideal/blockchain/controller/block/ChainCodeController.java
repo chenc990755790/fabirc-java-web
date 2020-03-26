@@ -2,10 +2,10 @@ package com.ideal.blockchain.controller.block;
 
 import com.ideal.blockchain.config.ChannelContext;
 import com.ideal.blockchain.controller.BaseController;
-import com.ideal.blockchain.dto.request.ChaincodeNameDto;
+import com.ideal.blockchain.req.ChaincodeNameReq;
 import com.ideal.blockchain.dto.request.FunctionAndArgsDto;
-import com.ideal.blockchain.dto.request.InvokeChainCodeArgsDto;
-import com.ideal.blockchain.dto.request.QueryArgsDto;
+import com.ideal.blockchain.req.InvokeChainCodeArgsReq;
+import com.ideal.blockchain.req.QueryArgsReq;
 import com.ideal.blockchain.dto.response.ResultInfo;
 import com.ideal.blockchain.enums.ResponseCodeEnum;
 import com.ideal.blockchain.service.block.ChainCodeService;
@@ -32,7 +32,7 @@ public class ChainCodeController extends BaseController {
 
     @RequestMapping(value = "/install", method = RequestMethod.POST)
     @ResponseBody
-    public ResultInfo installChaincode(@RequestBody ChaincodeNameDto chaincodeName) {
+    public ResultInfo installChaincode(@RequestBody ChaincodeNameReq chaincodeName) {
         try {
             if (StringUtils.isEmpty(chaincodeName.getUserName())) {
                 return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter username in reques body!");
@@ -208,7 +208,7 @@ public class ChainCodeController extends BaseController {
      */
     @RequestMapping(value = "/invoke", method = RequestMethod.POST)
     @ResponseBody
-    public ResultInfo invokeChaincode(@RequestBody InvokeChainCodeArgsDto chaincodeDto) throws Exception {
+    public ResultInfo invokeChaincode(@RequestBody InvokeChainCodeArgsReq chaincodeDto) throws Exception {
         try {
             if (StringUtils.isEmpty(chaincodeDto.getUserName())) {
                 return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter username in reques body!");
@@ -242,8 +242,10 @@ public class ChainCodeController extends BaseController {
             String uname = chaincodeDto.getUserName();
             String result = userService.loadUserFromPersistence(uname, chaincodeDto.getPassWord(), chaincodeDto.getBelongWithOrg());
             if (result == "Successfully loaded member from persistence") {
+                String collectionName = userService.getCollectionName(uname);
+                String[] newArgs = addArgsForCollectionName(collectionName,chaincodeDto.getArgs());
                 String response = chainCodeService.invokeChaincode(uname, chaincodeDto.getBelongWithOrg(), chaincodeDto.getPeerWithOrgs(), chaincodeDto.getChannelName(),
-                        chaincodeDto.getChainCodeName(), chaincodeDto.getFunction(), chaincodeDto.getArgs(), chaincodeDto.getChainCodeVersion());
+                        chaincodeDto.getChainCodeName(), chaincodeDto.getFunction(), newArgs, chaincodeDto.getChainCodeVersion());
                 if (response == "Transaction invoked successfully") {
                     return new ResultInfo(ResponseCodeEnum.SUCCESS, response);
                 } else {
@@ -266,40 +268,40 @@ public class ChainCodeController extends BaseController {
      */
     @RequestMapping(value = "/query", method = RequestMethod.POST)
     @ResponseBody
-    public ResultInfo queryChaincode(@RequestBody QueryArgsDto chaincodeDto) throws Exception {
+    public ResultInfo queryChaincode(@RequestBody QueryArgsReq req) throws Exception {
         try {
-            if (StringUtils.isEmpty(chaincodeDto.getUserName())) {
+            if (StringUtils.isEmpty(req.getUserName())) {
                 return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter username in reques body!");
             }
 //            if (StringUtils.isEmpty(chaincodeDto.getPassWord())) {
 //                return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter passwords in request body");
 //            }
-            if (StringUtils.isEmpty(chaincodeDto.getPeerWithOrg())) {
+            if (StringUtils.isEmpty(req.getPeerWithOrg())) {
                 return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter peerWithOrg in request body");
             }
-            if (StringUtils.isEmpty(chaincodeDto.getChannelName())) {
+            if (StringUtils.isEmpty(req.getChannelName())) {
                 return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter channelName in request body");
             }
-            if (StringUtils.isEmpty(chaincodeDto.getChainCodeName())) {
+            if (StringUtils.isEmpty(req.getChainCodeName())) {
                 return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter ChainCodeName in request body");
             }
-            if (StringUtils.isEmpty(chaincodeDto.getChainCodeVersion())) {
+            if (StringUtils.isEmpty(req.getChainCodeVersion())) {
                 return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter ChainCodeVersion in request body");
             }
-            if ((chaincodeDto.getFunction()) == null) {
+            if ((req.getFunction()) == null) {
                 return new ResultInfo(ResponseCodeEnum.FAILURE, "function not present in method body");
             }
-            if (chaincodeDto.getArgs() == null) {
+            if (req.getArgs() == null) {
 
                 return new ResultInfo(ResponseCodeEnum.FAILURE, "args not present in method body");
             }
-            String uname = chaincodeDto.getUserName();
+            String uname = req.getUserName();
 
-            String result = userService.loadUserFromPersistence(uname, chaincodeDto.getPassWord(), chaincodeDto.getPeerWithOrg());
+            String result = userService.loadUserFromPersistence(uname, req.getPassWord(), req.getPeerWithOrg());
             if (result == "Successfully loaded member from persistence") {
-                String[] strings = addArgsForCollectionName(userService.getCollectionName(uname),chaincodeDto.getArgs());
-                String response = chainCodeService.queryChainCode(uname, chaincodeDto.getPeerWithOrg(), chaincodeDto.getChannelName(),
-                        chaincodeDto.getChainCodeName(), chaincodeDto.getFunction(), strings, chaincodeDto.getChainCodeVersion());
+                String[] strings = addArgsForCollectionName(userService.getCollectionName(uname),req.getArgs());
+                String response = chainCodeService.queryChainCode(uname, req.getPeerWithOrg(), req.getChannelName(),
+                        req.getChainCodeName(), req.getFunction(), strings, req.getChainCodeVersion());
                 if (response != "Caught an exception while quering chaincode") {
                     return new ResultInfo(ResponseCodeEnum.SUCCESS, response);
                 } else {

@@ -118,7 +118,8 @@ public class ChainCodeService {
         instantiateProposalRequest.setArgs(chaincodeArgs);
         instantiateProposalRequest.setChaincodeVersion(chainCodeVersion);
         instantiateProposalRequest.setUserContext(HyperledgerConfiguration.config.getSampleOrg(belongWithOrg).getPeerAdmin());
-
+        instantiateProposalRequest.setChaincodeCollectionConfiguration(ChaincodeCollectionConfiguration.fromYamlFile(
+                new File(HyperledgerConfiguration.PATH + "/artifacts/PrivateDataIT.yaml") ));
         Map<String, byte[]> tm = new HashMap<>();
         tm.put("HyperLedgerFabric", "InstantiateProposalRequest:JavaSDK".getBytes(UTF_8));
         tm.put("method", "InstantiateProposalRequest".getBytes(UTF_8));
@@ -276,12 +277,12 @@ public class ChainCodeService {
         try{
             BlockEvent.TransactionEvent event =  channel.sendTransaction(successful).get(HyperledgerConfiguration.config.getTransactionWaitTime()
                     , TimeUnit.SECONDS);
-            //事务处理成功
+            //������ɹ�
             if (event.isValid()) {
-                log.info("事物处理成功");
+                log.info("���ﴦ��ɹ�");
                 result= "Transaction invoked successfully";
             } else {
-                log.info("事物处理失败");
+                log.info("���ﴦ��ʧ��");
                 result= "Transaction invoked Failed";
             }
         }catch (Exception e){
@@ -398,6 +399,8 @@ public class ChainCodeService {
         chaincodeEndorsementPolicy
                 .fromYamlFile(new File(HyperledgerConfiguration.PATH + "/artifacts/chaincodeendorsementpolicy.yaml"));
         upgradeProposalRequest.setChaincodeEndorsementPolicy(chaincodeEndorsementPolicy);
+        upgradeProposalRequest.setChaincodeCollectionConfiguration(ChaincodeCollectionConfiguration.fromYamlFile(
+                new File(HyperledgerConfiguration.PATH + "/artifacts/PrivateDataIT.yaml") ));
         Collection<ProposalResponse> responses;
         Collection<ProposalResponse> successful = new LinkedList<>();
         Collection<ProposalResponse> failed = new LinkedList<>();

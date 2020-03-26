@@ -41,3 +41,17 @@ CREATE TABLE `fabric_ca_user`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+alter table `fabric_ca_user` add column company_id varchar(20);
+
+DROP TABLE IF EXISTS `collection_config`;
+
+create table `collection_config`(
+    collection_name varchar(20) not null ,
+    sign_in_company varchar(20) COMMENT '签发企业ID',
+    sign_out_company varchar(20) COMMENT '签收企业ID',
+    financial_company varchar(20) COMMENT '金融机构ID',
+    promise_company varchar(20) COMMENT '承诺付款方'
+)
+;
+alter table `collection_config` add constraint unique_collection_config unique(sign_in_company,sign_out_company,financial_company);

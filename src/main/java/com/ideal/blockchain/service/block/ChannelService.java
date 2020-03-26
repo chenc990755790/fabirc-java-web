@@ -51,7 +51,7 @@ public class ChannelService {
         Orderer anOrderer = orderers.iterator().next();
         orderers.remove(anOrderer);
         ChannelConfiguration channelConfiguration = new ChannelConfiguration(
-                new File(HyperledgerConfiguration.PATH + "/artifacts/ccchannel/channel-artifacts/" + channelName + ".tx"));
+                new File(HyperledgerConfiguration.PATH + "/artifacts/cc1.4/channel-artifacts/" + channelName + ".tx"));
 
         // Create channel that has only one signer that is this orgs peer admin.
         // If channel creation policy needed more signature they would need to

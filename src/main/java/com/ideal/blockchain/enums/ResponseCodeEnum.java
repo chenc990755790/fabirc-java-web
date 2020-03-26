@@ -1,56 +1,52 @@
 package com.ideal.blockchain.enums;
 
-
-
-
-
 public enum ResponseCodeEnum {
 
-	SUCCESS("000000", "è¯·æ±‚å¤„ç†æˆåŠŸ"),
-	
-	PROCESSING("0000001", "è¯·æ±‚å·²å—ç†"),
-	
-	PROCESS_ERROR("000002", "è¯·æ±‚å—ç†å¤±è´¥"),
-	
-	PROCESS_CANCEL("000003", "è¯·æ±‚å—ç†æ’¤é”€"),
-	
-	PROCESS_SUCCESS("000004", "è¯·æ±‚å—ç†æˆåŠŸ"),
-	
-	MSG_PARSING_FAILURE("000005", "æŠ¥æ–‡è§£æžå¤±è´¥"),
-	
-	COMPRESS_FAILURE("000006", "æŠ¥æ–‡åŽ‹ç¼©å¤„ç†å¤±è´¥"),
-	
-	UNCOMPRESS_FAILURE("000007", "æŠ¥æ–‡è§£åŽ‹ç¼©å¤„ç†å¤±è´¥"),
-	
-	INVALID_PARAM("000008", "æ— æ•ˆçš„è¯·æ±‚å‚æ•°"),
-	
-	VALID_TARGETSYSCODE_FAILURE("000009", "ç›®æ ‡ç³»ç»Ÿæ ¡éªŒå¤±è´¥"),
-	
-	VALID_DATAMSGSIZE_FAILURE("000010", "è¯·æ±‚æŠ¥æ–‡å†…å®¹é•¿åº¦æ ¡éªŒå¤±è´¥"),
-	
-	UNDEFINED_SERVICE("000011", "è¯·æ±‚æœåŠ¡ä»£ç æœªå®šä¹‰"),
-	
-	PARAM_VRFY_FAIL("000012", "å‚æ•°æ ¡éªŒæœªé€šè¿‡"),
+	SUCCESS("000000", "ÇëÇó´¦Àí³É¹¦"),
 
-	ENCRYP_MACHINE_HANDLE_FAILURE("000013", "åŠ å¯†æœºå¤„ç†å¤±è´¥"),
-	
-	BUSI_ERROR("000014", "å†…éƒ¨æœåŠ¡å¼‚å¸¸"),
-	
-	SIGN_VERIFY_FAILURE("000015", "éªŒè¯ç­¾åå¤±è´¥"),
-	
-	IP_VERIFY_FAILURE("000016", "IPåœ°å€éªŒè¯å¤±è´¥"),
-	
-	FAILURE("999996","å¤±è´¥"),
-	
-	REMOTE_CALL_FAILURE("999997", "è¿œç¨‹è°ƒç”¨å¤±è´¥"),
+	PROCESSING("0000001", "ÇëÇóÒÑÊÜÀí"),
 
-	DB_ERROR("999998", "æ•°æ®åº“æ‰§è¡Œå¤±è´¥"),
+	PROCESS_ERROR("000002", "ÇëÇóÊÜÀíÊ§°Ü"),
 
-	UNDEFINED_ERROR("999999", "æœåŠ¡å¤„ç†å¤±è´¥"),
-	
+	PROCESS_CANCEL("000003", "ÇëÇóÊÜÀí³·Ïú"),
 
-	
-	
+	PROCESS_SUCCESS("000004", "ÇëÇóÊÜÀí³É¹¦"),
+
+	MSG_PARSING_FAILURE("000005", "±¨ÎÄ½âÎöÊ§°Ü"),
+
+	COMPRESS_FAILURE("000006", "±¨ÎÄÑ¹Ëõ´¦ÀíÊ§°Ü"),
+
+	UNCOMPRESS_FAILURE("000007", "±¨ÎÄ½âÑ¹Ëõ´¦ÀíÊ§°Ü"),
+
+	INVALID_PARAM("000008", "ÎÞÐ§µÄÇëÇó²ÎÊý"),
+
+	VALID_TARGETSYSCODE_FAILURE("000009", "Ä¿±êÏµÍ³Ð£ÑéÊ§°Ü"),
+
+	VALID_DATAMSGSIZE_FAILURE("000010", "ÇëÇó±¨ÎÄÄÚÈÝ³¤¶ÈÐ£ÑéÊ§°Ü"),
+
+	UNDEFINED_SERVICE("000011", "ÇëÇó·þÎñ´úÂëÎ´¶¨Òå"),
+
+	PARAM_VRFY_FAIL("000012", "²ÎÊýÐ£ÑéÎ´Í¨¹ý"),
+
+	ENCRYP_MACHINE_HANDLE_FAILURE("000013", "¼ÓÃÜ»ú´¦ÀíÊ§°Ü"),
+
+	BUSI_ERROR("000014", "ÄÚ²¿·þÎñÒì³£"),
+
+	SIGN_VERIFY_FAILURE("000015", "ÑéÖ¤Ç©ÃûÊ§°Ü"),
+
+	IP_VERIFY_FAILURE("000016", "IPµØÖ·ÑéÖ¤Ê§°Ü"),
+
+	FAILURE("999996","Ê§°Ü"),
+
+	REMOTE_CALL_FAILURE("999997", "Ô¶³Ìµ÷ÓÃÊ§°Ü"),
+
+	DB_ERROR("999998", "Êý¾Ý¿âÖ´ÐÐÊ§°Ü"),
+
+	UNDEFINED_ERROR("999999", "·þÎñ´¦ÀíÊ§°Ü"),
+
+
+
+
 	;
 	private String code;
 	private String desc;
@@ -90,6 +86,6 @@ public enum ResponseCodeEnum {
 		}
 		return false;
 	}
-	
+
 
 }

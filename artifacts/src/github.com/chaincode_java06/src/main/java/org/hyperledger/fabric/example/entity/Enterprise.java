@@ -1,16 +1,18 @@
 package org.hyperledger.fabric.example.entity;
 
+import java.util.Date;
+
 public class Enterprise{
 
     public static final String OBJECT_TYPE_NAME="enterprise";
 
-    private String objectType = OBJECT_TYPE_NAME;
+    private static final String objectType = OBJECT_TYPE_NAME;
 
     private String id;
 
     private String name;
 
-    private String createDate;
+    private Date createDate;
 
     private String createdUser;
 
@@ -36,15 +38,11 @@ public class Enterprise{
         return objectType;
     }
 
-    public void setObjectType(String objectType) {
-        this.objectType = objectType;
-    }
-
-    public String getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(String createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 

@@ -1,6 +1,5 @@
 package com.ideal.blockchain.dao.mapper;
 
-
 import com.ideal.blockchain.dao.base.BaseMapper;
 import com.ideal.blockchain.dao.model.FabricCaUser;
 
@@ -13,4 +12,6 @@ public interface FabricCaUserMapper extends BaseMapper<FabricCaUser> {
     void updateCollectionName(Map<String,Object> parameters);
 
     String getCollectionName(String name);
+
+    String getCompanyIdByName(String name);
 }

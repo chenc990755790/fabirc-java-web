@@ -210,8 +210,13 @@ public class UserService {
 
         return "Successfully loaded member from persistence";
     }
+
     public String getCollectionName(String name) {
         String col_name = fabricCaUserService.getCollectionName(name);
         return StringUtils.isEmpty(col_name) ? "" : col_name;
+    }
+
+    public String getCompanyIdByName(String name) {
+        return fabricCaUserService.getCompanyIdByName(name);
     }
 }
