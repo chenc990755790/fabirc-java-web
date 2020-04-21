@@ -14,6 +14,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperledger.fabric.example.entity.InvoiceInfo;
 import org.hyperledger.fabric.example.entity.Receivable;
 import org.hyperledger.fabric.example.entity.SettlementAccount;
+import org.hyperledger.fabric.example.entity.EnterpriseInfo;
+import org.hyperledger.fabric.example.entity.Enterprise;
 import org.hyperledger.fabric.example.entity.UserInfo;
 import org.hyperledger.fabric.shim.ChaincodeBase;
 import org.hyperledger.fabric.shim.ChaincodeStub;
@@ -24,18 +26,43 @@ import java.util.Iterator;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hyperledger.fabric.example.consts.FunctionConst.*;
 
 
 public class SimpleChaincode extends ChaincodeBase {
 
+    private static final String QUERY = "query";
+
+    private static final String RICH_QUERY = "richQuery";
+
+    private static final String SAVE_ENTERPRISE = "saveEnterprise";
+
+    private static final String DELETE = "delete";
+
+    private static final String QUERY_ENTERPRISE = "queryEnterprise";
+
+    private static final String QUERY_ENTERPRISE_ALL = "queryAllEnterprise";
+
+    private static final String SAVE_PRIVATE = "savePrivate";
+
+    private static final String DELETE_PRIVATE = "delPrivate";
+
+    private static final String QUERY_PRIVATE_ID = "queryPrivateById";
+
+    private static final String QUERY_PRIVATE = "queryPrivate";
+
+    private static final String SAVE_ENTERPRISE_INVOICE = "saveEnterpriseInvoice";
+
+    private static final String SAVE_SETTLEMENT_ACCOUNT = "saveSettlementAccount";
+
+    private static final String SAVE_USER_INFO = "saveUserInfo";
+
+    private static final String SAVE_ENTERPRISE_INFO = "saveEnterpriseInfo";
+
+    private static Log _logger = LogFactory.getLog(SimpleChaincode.class);
+
     private final Gson gson = new GsonBuilder().create();
 
     private final EnterpriseChainCode enterpriseChainCode = new EnterpriseChainCode();
-
-    private final LoanChainCode loanChainCode = new LoanChainCode();
-
-    protected static final Log _logger = LogFactory.getLog(SimpleChaincode.class);
 
     @Override
     public Response init(ChaincodeStub stub) {
@@ -49,7 +76,6 @@ public class SimpleChaincode extends ChaincodeBase {
         } catch (Throwable e) {
             return newErrorResponse(e);
         }
-
     }
 
     @Override
@@ -58,13 +84,16 @@ public class SimpleChaincode extends ChaincodeBase {
             _logger.info("Invoke java simple chaincode");
             String func = stub.getFunction();
             List<String> params = stub.getParameters();
-            if (FUNCTION_QUERYENTERPRISE.equals(func)) {
+            if (SAVE_ENTERPRISE.equals(func)) {
+                return enterpriseChainCode.saveEnterprise(stub, params);
+            }
+            if (QUERY_ENTERPRISE.equals(func)) {
                 return enterpriseChainCode.getEnterpriseById(stub, params);
             }
-            if (QUERY_ENTERPRISE_ID_NANME.equals(func)) {
-                return enterpriseChainCode.queryEnterpriseByIdOrName(stub, params);
+            if (QUERY_ENTERPRISE_ALL.equals(func)) {
+                return enterpriseChainCode.queryAllEnterprise(stub, params);
             }
-            if (FUNCTION_QUERY.equals(func)) {
+            if (QUERY.equals(func)) {
                 return query(stub, params);
             }
             if (RICH_QUERY.equals(func)) {
@@ -73,16 +102,16 @@ public class SimpleChaincode extends ChaincodeBase {
             if (DELETE.equals(func)) {
                 return delete(stub, params);
             }
-            if (FUNCTION_SAVEPRIVATE.equals(func)) {
+            if (SAVE_PRIVATE.equals(func)) {
                 return savePrivate(stub, params);
             }
-            if (FUNCTION_DELETEPRIVATE.equals(func)) {
+            if (DELETE_PRIVATE.equals(func)) {
                 return delPrivate(stub, params);
             }
             if (QUERY_PRIVATE_ID.equals(func)) {
                 return queryPrivateById(stub, params);
             }
-            if (FUNCTION_QUERYPRIVATE.equals(func)) {
+            if (QUERY_PRIVATE.equals(func)) {
                 return queryPrivate(stub, params);
             }
             if (SAVE_ENTERPRISE_INVOICE.equals(func)) {
@@ -95,78 +124,11 @@ public class SimpleChaincode extends ChaincodeBase {
                 return saveUserInfo(stub, params);
             }
             if (SAVE_ENTERPRISE_INFO.equals(func)) {
-                return enterpriseChainCode.saveEnterpriseInfo(stub, params);
-            }
-            if (SAVE_RECEIVABLE.equals(func)) {
-                return saveReceivable(stub, params);
-            }
-            if (FUNCTION_SAVEASSETINFO.equals(func)) {
-                return loanChainCode.saveAssetInfo(stub, params);
-            }
-            if (FUNCTION_SAVEAUDITINFO.equals(func)) {
-                return loanChainCode.saveAuditInfo(stub, params);
-            }
-            if (FUNCTION_SAVEBALANCE.equals(func)) {
-                return loanChainCode.saveBalance(stub, params);
-            }
-            if (FUNCTION_SAVEBILLINFO.equals(func)) {
-                return loanChainCode.saveBillInfo(stub, params);
-            }
-            if (FUNCTION_SAVECAPITALDIVERT.equals(func)) {
-                return loanChainCode.saveCapitalDivert(stub, params);
-            }
-            if (FUNCTION_SAVECAPITALNOTICE.equals(func)) {
-                return loanChainCode.saveCapitalNotice(stub, params);
-            }
-            if (FUNCTION_SAVECOMPANYINFO.equals(func)) {
-                return loanChainCode.saveCompanyInfo(stub, params);
-            }
-            if (FUNCTION_SAVECOMPANYRATING.equals(func)) {
-                return loanChainCode.saveCompanyRating(stub, params);
-            }
-            if (FUNCTION_SAVECONTRACTINFO.equals(func)) {
-                return loanChainCode.saveContractInfo(stub, params);
-            }
-            if (FUNCTION_SAVECUSTACCOUNTINFO.equals(func)) {
-                return loanChainCode.saveCustAccountInfo(stub, params);
-            }
-            if (FUNCTION_SAVECUSTINFO.equals(func)) {
-                return loanChainCode.saveCustInfo(stub, params);
-            }
-            if (FUNCTION_SAVECUSTPAYMENT.equals(func)) {
-                return loanChainCode.saveCustPayment(stub, params);
-            }
-            if (FUNCTION_SAVEDETAILASSET.equals(func)) {
-                return loanChainCode.saveDetailAsset(stub, params);
-            }
-            if (FUNCTION_SAVEPLATACCOUNT.equals(func)) {
-                return loanChainCode.savePlatAccount(stub, params);
-            }
-            if (FUNCTION_SAVEPLEDGENOTE.equals(func)) {
-                return loanChainCode.savePledgeNote(stub, params);
-            }
-            if (FUNCTION_SAVEPRODUCTINFO.equals(func)) {
-                return loanChainCode.saveProductInfo(stub, params);
-            }
-            if (FUNCTION_SAVEPROJECTBASIC.equals(func)) {
-                return loanChainCode.saveProjectBasic(stub, params);
-            }
-            if (FUNCTION_SAVEREPAYINFO.equals(func)) {
-                return loanChainCode.saveRepayInfo(stub, params);
-            }
-            if (FUNCTION_SAVEREPAYPLAN.equals(func)) {
-                return loanChainCode.saveRepayPlan(stub, params);
-            }
-            if (FUNCTION_SAVESELFPRODCHANGE.equals(func)) {
-                return loanChainCode.saveSelfProdChange(stub, params);
-            }
-            if (FUNCTION_SAVESELFPRODPAYMENT.equals(func)) {
-                return loanChainCode.saveSelfProdPayment(stub, params);
+                return saveEnterpriseInfo(stub, params);
             }
             return newErrorResponse("Invalid invoke function name :" + func);
-        } catch (IllegalArgumentException e) {
-            return newErrorResponse(e.getMessage());
         } catch (Throwable e) {
+
             return newErrorResponse(e);
         }
     }
@@ -207,7 +169,7 @@ public class SimpleChaincode extends ChaincodeBase {
         if (args.size() != 2) {
             return newErrorResponse(String.format("Incorrect number of arguments. Expecting 2. reality %s", args.size()));
         }
-        String collectionName = args.get(0).replace("[", "").replace("]", "").split(",")[0];
+        String collectionName = args.get(0).replace("[","").replace("]","").split(",")[0];
         String privateKey = args.get(1);
         _logger.info(String.format("first parameter is %s , second parameter is %s", collectionName, privateKey));
 
@@ -220,17 +182,16 @@ public class SimpleChaincode extends ChaincodeBase {
     }
 
     private Response queryPrivate(ChaincodeStub stub, List<String> args) {
-        if (args.size() < 1 || args.size() % 2 == 0) {
+        if (args.size() <= 1 || args.size() % 2 == 0) {
             return newErrorResponse(String.format("Incorrect number of arguments. reality %s", args.toString()));
         }
-        String[] collectionNameList = args.get(0).replace("[", "").replace("]", "")
-                .replaceAll(" ", "").split(",");
-        String richQueryString = QueryUtil.getRichQueryString(args.subList(1, args.size()), false);
+        String[] collectionNameList = args.get(0).replace("[","").replace("]","").split(",");
+
+        String richQueryString = getRichQueryString(args.subList(1, args.size() - 1));
         String queryString = String.format("{\"selector\":{%s}}", richQueryString);
         _logger.info("rich query string is :" + queryString);
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < collectionNameList.length; i++) {
-            _logger.info("query from collection:" + collectionNameList[i]);
             QueryResultsIterator<KeyValue> values = stub.getPrivateDataQueryResult(collectionNameList[i], queryString);
             Iterator<KeyValue> iterator = values.iterator();
             while (iterator.hasNext()) {
@@ -267,9 +228,37 @@ public class SimpleChaincode extends ChaincodeBase {
             _logger.info("params size :" + args.size());
             return newErrorResponse("Incorrect number of arguments. Expecting name of the person to query:" + args.toString());
         }
-        String sb = QueryUtil.getQueryForResult(stub, QueryUtil.getRichQueryString(args, false));
-        return newSuccessResponse(sb, ByteString.copyFrom(sb, UTF_8).toByteArray());
+        String richQueryString = getRichQueryString(args);
+        String queryString = String.format("{\"selector\":{%s}}", richQueryString);
+        _logger.info("rich query string is :" + queryString);
+        QueryResultsIterator<KeyValue> values = stub.getQueryResult(queryString);
+        if (values == null) {
+            return newErrorResponse(String.format("Error: KeyValue state for %s is null", queryString));
+        }
+        Iterator<KeyValue> iterator = values.iterator();
+        StringBuilder sb = new StringBuilder("[");
+        while (iterator.hasNext()) {
+            KeyValue keyValue = iterator.next();
+            sb.append(keyValue.getStringValue());
+            sb.append(",");
+        }
+        if (sb.length() > 1)
+            sb.deleteCharAt(sb.length() - 1);
+        sb.append("]");
+        _logger.info(String.format("Query Response:\nKey: %s, Value: %s\n", queryString, sb.toString()));
+        return newSuccessResponse(sb.toString(), ByteString.copyFrom(sb.toString(), UTF_8).toByteArray());
     }
+
+    private String getRichQueryString(List<String> args) {
+        StringBuilder sb = new StringBuilder();
+        int k = args.size() / 2;
+        for (int i = 0; i < k; i++) {
+            sb.append(String.format("\"%s\":\"%s\"", args.get(i * 2), args.get(i * 2 + 1))).append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
+    }
+
 
     private Response saveEnterpriseInvoice(ChaincodeStub stub, List<String> args) {
         if (args.size() != 1) {
@@ -279,7 +268,7 @@ public class SimpleChaincode extends ChaincodeBase {
         InvoiceInfo invoiceInfo = gson.fromJson(args.get(0), InvoiceInfo.class);
 
         _logger.info("conversion  InvoiceInfo is" + invoiceInfo);
-        String key = invoiceInfo.getObjectType() + invoiceInfo.getCompanyId();
+        String key = invoiceInfo.getObjectType() + invoiceInfo.getTaxpayerIdentifyNo();
 
         stub.putStringState(key, args.get(0));
         _logger.info("Transfer complete" + key);
@@ -319,15 +308,31 @@ public class SimpleChaincode extends ChaincodeBase {
         return newSuccessResponse("invoke finished successfully:", ByteString.copyFrom(key, UTF_8).toByteArray());
     }
 
-    private Response saveReceivable(ChaincodeStub stub, List<String> args) {
+    private Response saveEnterprise(ChaincodeStub stub, List<String> args) {
         if (args.size() != 1) {
             return newErrorResponse("Incorrect number of arguments. Expecting 1");
         }
         _logger.info("args  parameter is" + args.get(0));
-        Receivable userInfo = gson.fromJson(args.get(0), Receivable.class);
+        Enterprise enterprise = gson.fromJson(args.get(0), Enterprise.class);
 
-        _logger.info("conversion  Receivable is" + userInfo);
-        String key = userInfo.getObjectType() + userInfo.getReceivableRequestId();
+        _logger.info("conversion  SettlementAccount is" + enterprise);
+        String key = enterprise.getObjectType() + enterprise.getCompanyId();
+
+        stub.putStringState(key, args.get(0));
+        _logger.info("Transfer complete" + key);
+
+        return newSuccessResponse("invoke finished successfully:", ByteString.copyFrom(key, UTF_8).toByteArray());
+    }
+
+    private Response saveEnterpriseInfo(ChaincodeStub stub, List<String> args) {
+        if (args.size() != 1) {
+            return newErrorResponse("Incorrect number of arguments. Expecting 1");
+        }
+        _logger.info("args  parameter is" + args.get(0));
+        EnterpriseInfo enterpriseInfo = gson.fromJson(args.get(0), EnterpriseInfo.class);
+
+        _logger.info("conversion  SettlementAccount is" + enterpriseInfo);
+        String key = enterpriseInfo.getObjectType() + enterpriseInfo.getCompanyId();
 
         stub.putStringState(key, args.get(0));
         _logger.info("Transfer complete" + key);
@@ -337,7 +342,6 @@ public class SimpleChaincode extends ChaincodeBase {
 
     public static void main(String[] args) {
         System.out.println("OpenSSL avaliable: " + OpenSsl.isAvailable());
-
         new SimpleChaincode().start(args);
     }
 

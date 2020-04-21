@@ -4,7 +4,7 @@ package org.hyperledger.fabric.example.entity;
 import java.util.Date;
 
 public class SettlementAccount {
-    private static final String OBJECT_TYPE_NAME="enterprise_account";
+    public static final String OBJECT_TYPE_NAME="enterprise_account";
 
     private static final String objectType = OBJECT_TYPE_NAME;
 
