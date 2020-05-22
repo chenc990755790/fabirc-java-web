@@ -1,15 +1,15 @@
 package com.ideal.blockchain.dto.request;
 
+import com.ideal.blockchain.req.ChannelNameReq;
+import lombok.Data;
 
-public class BlockDto extends ChannelDto{
+import javax.validation.constraints.NotEmpty;
 
-    private String txId;
+@Data
+public class BlockDto extends ChannelNameReq {
 
-    public String getTxId() {
-        return txId;
-    }
+    @NotEmpty(message = "交易id不能为空")
+    private String[] txIdList;
 
-    public void setTxId(String txId) {
-        this.txId = txId;
-    }
+
 }

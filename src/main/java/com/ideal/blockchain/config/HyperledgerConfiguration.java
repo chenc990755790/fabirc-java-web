@@ -16,21 +16,24 @@ import java.util.Collection;
 import java.util.Properties;
 
 /**
- * @author: LeonMa
- * @date: 2019/01/10 12:25
+ * @author:
+ * @date:
  */
-@PropertySource("hyperledger.properties")
+@PropertySource("classpath:hyperledger.properties")
 @Component
 @Data
 public class HyperledgerConfiguration {
 
     public static String PATH = System.getProperty("user.dir");
 
-    public static final Config config = Config.getConfig();
+    public static Config config ;
 
     private final ConfigHelper configHelper = new ConfigHelper();
 
     private Collection<Org> SampleOrgs;
+
+    @Value("${fabric.config}")
+    private String fabricConfig;
 
     @Value("${ADMIN_NAME}")
     private String adminName;
@@ -47,7 +50,7 @@ public class HyperledgerConfiguration {
      * checking config at starting
      */
     public void checkConfig(HFClient client) throws Exception {
-
+        config=Config.getConfig(fabricConfig);
         SampleOrgs = config.getSampleOrgs();
 
         client.setCryptoSuite(CryptoSuite.Factory.getCryptoSuite());
@@ -68,7 +71,7 @@ public class HyperledgerConfiguration {
      * checking config at starting
      */
     public void loadOrderersAndPeers(HFClient client, String peerWtihOrg) throws Exception {
-
+        config=Config.getConfig(fabricConfig);
         // Set up hfca for each sample org
 
         Org sampleOrg = config.getSampleOrg(peerWtihOrg);
@@ -96,7 +99,7 @@ public class HyperledgerConfiguration {
     }
 
     public ChaincodeID getChaincodeId(String chaincodeName, String chainCodeVersion) {
-        ChaincodeID chaincodeID = ChaincodeID.newBuilder().setName(chaincodeName).setVersion(chainCodeVersion)//.setPath(chainCodePath + "/" + chaincodeName)
+        ChaincodeID chaincodeID = ChaincodeID.newBuilder().setName(chaincodeName).setVersion(chainCodeVersion)
                 .build();
         return chaincodeID;
     }

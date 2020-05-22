@@ -2,20 +2,18 @@ package com.ideal.blockchain.controller.block;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.ideal.blockchain.controller.BaseController;
 import com.ideal.blockchain.dto.request.UserDto;
 import com.ideal.blockchain.dto.response.ResultInfo;
-import com.ideal.blockchain.entity.UserInfo;
 import com.ideal.blockchain.enums.ResponseCodeEnum;
-import com.ideal.blockchain.req.EnterpriseReq;
 import com.ideal.blockchain.req.InvokeChainCodeArgsReq;
 import com.ideal.blockchain.req.UserInfoReq;
+import com.ideal.blockchain.service.block.BaseService;
 import com.ideal.blockchain.service.block.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 
@@ -26,32 +24,22 @@ import javax.validation.Valid;
 @Slf4j
 @RestController
 @RequestMapping("/user")
-public class UserController extends BaseController {
+public class UserController  {
 
     private final Gson gson = new GsonBuilder().create();
 
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private BaseService baseService;
+
     @RequestMapping(value = "/enroll", method = RequestMethod.POST)
     @ResponseBody
-    public ResultInfo enroll(@RequestBody UserDto user) {
+    @ApiIgnore
+    public ResultInfo enroll(@RequestBody @Valid UserDto user) {
         try {
-            if (StringUtils.isEmpty(user.getUserName())) {
-                return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter username in reques body!");
-            }
-//            if (StringUtils.isEmpty(user.getPassWord())) {
-//                return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter password in request body");
-//            }
-            if (StringUtils.isEmpty(user.getPeerWithOrg())) {
-                return new ResultInfo(ResponseCodeEnum.FAILURE, "please enter peerWithOrg in request body");
-            }
-            String result;
-            if (StringUtils.isEmpty(user.getCollectionName())) {
-                 result = userService.register(user.getUserName(), user.getPassWord(), user.getPeerWithOrg());
-            } else {
-                result = userService.register(user.getUserName(), user.getPassWord(), user.getPeerWithOrg(),user.getCollectionName());
-            }
+            String result = userService.register(user.getUserName(), user.getPassWord(), user.getPeerWithOrg(), null);
             return new ResultInfo(ResponseCodeEnum.SUCCESS, result);
 
         } catch (Exception e) {
@@ -63,24 +51,31 @@ public class UserController extends BaseController {
 
     @RequestMapping(value = "/saveUserInfo", method = RequestMethod.POST)
     @ResponseBody
-    public ResultInfo saveUserInfo(@RequestBody @Validated UserInfoReq req) {
-        String userInfoJson = gson.toJson(req.getUserInfo());
-        String[] newArgs = new String[] {userInfoJson};
-        return invokeChainCode(req, newArgs);
+    public ResultInfo saveUserInfo(@RequestBody  UserInfoReq req) {
+        try {
+            userService.register(req.getUserInfo().getUserId(), req.getUserInfo().getLoginPassword(), req.getPeerWithOrgs()[0], req.getUserInfo().getCompanyId());
+            String userInfoJson = gson.toJson(req.getUserInfo());
+            String[] newArgs = new String[]{userInfoJson};
+            return baseService.invokeChainCode(req, newArgs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            return new ResultInfo(ResponseCodeEnum.FAILURE, "注册企业用户失败，请查看日志");
+        }
     }
 
     @RequestMapping(value = "/modifyUserInfo", method = RequestMethod.POST)
     @ResponseBody
     public ResultInfo modifyUserInfo(@RequestBody @Valid UserInfoReq req) {
         String userInfoJson = gson.toJson(req.getUserInfo());
-        String[] newArgs = new String[] {userInfoJson};
-        return invokeChainCode(req, newArgs);
+        String[] newArgs = new String[]{userInfoJson};
+        return baseService.invokeChainCode(req, newArgs);
     }
 
     @RequestMapping(value = "/deleteUserInfo", method = RequestMethod.POST)
     @ResponseBody
     public ResultInfo deleteUserInfo(@RequestBody @Valid InvokeChainCodeArgsReq req) {
-        return invokeChainCode(req);
+        return baseService.invokeChainCode(req);
     }
 
 }

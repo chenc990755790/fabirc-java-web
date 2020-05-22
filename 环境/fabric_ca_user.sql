@@ -47,11 +47,13 @@ alter table `fabric_ca_user` add column company_id varchar(20);
 DROP TABLE IF EXISTS `collection_config`;
 
 create table `collection_config`(
+    id int(11) NOT NULL AUTO_INCREMENT,
     collection_name varchar(20) not null ,
     sign_in_company varchar(20) COMMENT '签发企业ID',
     sign_out_company varchar(20) COMMENT '签收企业ID',
     financial_company varchar(20) COMMENT '金融机构ID',
-    promise_company varchar(20) COMMENT '承诺付款方'
+    promise_company varchar(20) COMMENT '承诺付款方',
+    PRIMARY KEY (id) USING BTREE
 )
 ;
 alter table `collection_config` add constraint unique_collection_config unique(sign_in_company,sign_out_company,financial_company);

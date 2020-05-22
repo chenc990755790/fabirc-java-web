@@ -42,15 +42,7 @@ public class UserService {
     @Autowired
     private HyperledgerConfiguration hyperledgerConfiguration;
 
-    public synchronized String register(String name, String password, String peerWithOrg, String collectionName) throws Exception {
-        register(name, password, peerWithOrg);
-        if (StringUtils.isNotEmpty(collectionName)) {
-            fabricCaUserService.updateUserCollectionName(name, collectionName);
-        }
-        return "User " + name + " enroll Successfully";
-    }
-
-    public synchronized String register(String name, String password, String peerWithOrg) throws Exception {
+    public synchronized String register(String name, String password, String peerWithOrg,String companyId) throws Exception {
         HFClient client = HFClient.createNewInstance();
         hyperledgerConfiguration.checkConfig(client);
 
@@ -69,7 +61,7 @@ public class UserService {
         String infoName = info.getCAName();
         log.info("CAName: " + infoName);
         if (infoName != null && !infoName.isEmpty()) {
-            //è¿”å›é”™è¯¯ä¿¡æ¯
+            //·µ»Ø´íÎóĞÅÏ¢
 
         }
         FabricCaUser adminFabricCaUser = fabricCaUserService.selFabricCaUserByNameAndEnrollmentSecret(hyperledgerConfiguration.getAdminName(),orgName,hyperledgerConfiguration.getAdminPwd());
@@ -113,25 +105,19 @@ public class UserService {
         FabricCaUser userFabricCaUser = fabricCaUserService.selFabricCaUserByNameAndEnrollmentSecret(name,orgName,password);
         if(userFabricCaUser == null) {
             HyperUser user = new HyperUser(name, orgName);
-
+            user.setCompanyId(companyId);
             RegistrationRequest rr = new RegistrationRequest(user.getName());
             rr.setMaxEnrollments(1);
 
-            /**è‡ªå®šä¹‰çš„ç”¨æˆ·å¯†ç  rr.setSecret(password);**/
-
+             rr.setSecret(password);
             try {
                 String secret = ca.register(rr, admin);
                 log.info("****userName: " + user.getName() + ",password: " + password + ",secret: " + secret);
-                user.setEnrollmentSecret(secret);
-
-                Enrollment enrollment = ca.enroll(user.getName(), secret);
+                user.setEnrollmentSecret(password);
+                Enrollment enrollment = ca.enroll(user.getName(), password);
                 user.setEnrollment(enrollment);
                 user.setMspId(msPid);
-
-
                 fabricCaUserService.insertFabricCaUser(user, peerWithOrg);
-
-
             } catch (RegistrationException re) {
                 re.printStackTrace();
                 log.error(re.getMessage());
@@ -142,14 +128,14 @@ public class UserService {
     }
 
 
-    public String loadUserFromPersistence(String name, String password, String peerWithOrg) throws Exception {
+    public void loadUserFromPersistence(String name, String password, String peerWithOrg) throws Exception {
         HFClient client = HFClient.createNewInstance();
         hyperledgerConfiguration.checkConfig(client);
 
 
         Org sampleOrg = HyperledgerConfiguration.config.getSampleOrg(peerWithOrg);
 
-        //å¦‚æœå‡ºç°é«˜å¹¶å‘æƒ…å†µ,CAæœåŠ¡ä¼šå‡ºç°ç½‘ç»œç§¯å‹,é€ æˆæœåŠ¡è°ƒç”¨å¤±è´¥...æ‰€ä»¥ç›®å‰æš‚æ—¶ ä¸reenrollç”¨æˆ·çš„æ–°è¯ä¹¦
+        //Èç¹û³öÏÖ¸ß²¢·¢Çé¿ö,CA·şÎñ»á³öÏÖÍøÂç»ıÑ¹,Ôì³É·şÎñµ÷ÓÃÊ§°Ü...ËùÒÔÄ¿Ç°ÔİÊ± ²»reenrollÓÃ»§µÄĞÂÖ¤Êé
 //        HFCAClient ca = sampleOrg.getCAClient();
         String orgName = sampleOrg.getName();
         String msPid = sampleOrg.getMSPID();
@@ -159,7 +145,7 @@ public class UserService {
 //        String infoName = info.getCAName();
 //        log.info("CAName: " + infoName);
 //        if (infoName != null && !infoName.isEmpty()) {
-//            //è¿”å›é”™è¯¯ä¿¡æ¯
+//            //·µ»Ø´íÎóĞÅÏ¢
 //
 //        }
         FabricCaUser adminFabricCaUser = fabricCaUserService.selFabricCaUserByNameAndEnrollmentSecret(hyperledgerConfiguration.getAdminName(),orgName,hyperledgerConfiguration.getAdminPwd());
@@ -207,8 +193,6 @@ public class UserService {
         }else{
             throw new Exception( name + " User is Not exist");
         }
-
-        return "Successfully loaded member from persistence";
     }
 
     public String getCollectionName(String name) {

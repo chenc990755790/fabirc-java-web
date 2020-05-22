@@ -22,16 +22,16 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * 
+ *
  * @author m1039224
  *
  */
 
 
 /**
- * 
+ *
  * Class for generating swagger ui
- * You can hit all the endpoints after running the application on http://localhost:8080/swagger-ui.html#/
+ * You can hit all the endpoints after running the application on http://localhost:8031/swagger-ui.html#/
  *
  */
 @Configuration

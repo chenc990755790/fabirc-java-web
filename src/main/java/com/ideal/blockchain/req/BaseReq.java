@@ -8,8 +8,8 @@ import javax.validation.constraints.NotBlank;
 public class BaseReq {
 
     @NotBlank(message = "please enter username in request body!")
-    private String userName;
+    private String userName ;
 
     @NotBlank(message = "please enter passWord in request body!")
-    private String passWord;
+    private String passWord ;
 }

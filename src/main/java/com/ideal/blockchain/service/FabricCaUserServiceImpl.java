@@ -31,12 +31,10 @@ public class FabricCaUserServiceImpl {
             FabricCaUser fabricCaUser = new FabricCaUser();
             fabricCaUser.setAccount(user.getAccount());
             fabricCaUser.setAffiliation(user.getAffiliation());
-
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(bos);
             oos.writeObject(user.getEnrollment());
             oos.flush();
-
             fabricCaUser.setEnrollment(Hex.toHexString(bos.toByteArray()));
             fabricCaUser.setEnrollmentsecret(user.getEnrollmentSecret());
             Calendar cal = Calendar.getInstance();
@@ -47,11 +45,11 @@ public class FabricCaUserServiceImpl {
             fabricCaUser.setOrganization(user.getOrganization());
             fabricCaUser.setRoles(JSONObject.toJSONString(user.getRoles()));
             fabricCaUser.setCreateDate(new Date());
+            fabricCaUser.setCompanyId(user.getCompanyId());
             fabricCaUserMapper.insertSelective(fabricCaUser);
-
-
         }catch (Exception e){
             logger.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 

@@ -1,17 +1,21 @@
 package com.ideal.blockchain.service.block;
 
-import com.alibaba.fastjson.JSONObject;
 import com.ideal.blockchain.config.ChannelContext;
 import com.ideal.blockchain.config.HyperledgerConfiguration;
+import com.ideal.blockchain.dto.request.BlockDto;
+import com.ideal.blockchain.dto.response.BlockMessage;
 import com.ideal.blockchain.model.Org;
+import com.ideal.blockchain.utils.ByteConvertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Hex;
 import org.hyperledger.fabric.sdk.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 
 /**
  * @author: LeonMa
@@ -57,7 +61,7 @@ public class BlockService {
         return returnedBlock;
     }
 
-    public TransactionInfo blockchainInfo(String name, String peerWithOrg, String channelName,String txId) throws Exception {
+    public TransactionInfo blockchainInfo(String name, String peerWithOrg, String channelName, String txId) throws Exception {
         HFClient client = HFClient.createNewInstance();
         hyperledgerConfiguration.checkConfig(client);
 
@@ -72,17 +76,54 @@ public class BlockService {
     }
 
 
-    public BlockInfo blockChainInfoByTxnId(String name, String peerWithOrg, String channelName,String txId) throws Exception {
+    public BlockInfo blockChainInfoByTxnId(String name, String peerWithOrg, String channelName, String txId) throws Exception {
         HFClient client = HFClient.createNewInstance();
         hyperledgerConfiguration.checkConfig(client);
 
         Org sampleOrg = HyperledgerConfiguration.config.getSampleOrg(peerWithOrg);
         client.setUserContext(sampleOrg.getUser(name));
         channelService.reconstructChannel(peerWithOrg, channelName, client);
-        Channel channel =  ChannelContext.get();
+        Channel channel = ChannelContext.get();
 
 
         BlockInfo blockInfo = channel.queryBlockByTransactionID(txId);
+        return blockInfo;
+    }
+
+    @Async("taskExecutor")
+    public void asynGetBlockByTxId(Semaphore semaphore,List blockList, BlockDto blockDto, CountDownLatch countDownLatch, int i){
+        log.info(Thread.currentThread().getName());
+        try {
+            BlockInfo blockInfo = blockChainInfoByTxnId(blockDto.getUserName(), blockDto.getPeerWithOrg(), blockDto.getChannelName(), blockDto.getTxIdList()[i]);
+            BlockMessage blockMessage = new BlockMessage();
+            blockMessage.setTxid(blockDto.getTxIdList()[i]);
+            blockMessage.setBlockNumber(blockInfo.getBlockNumber());
+            blockMessage.setChannelId(blockInfo.getChannelId());
+            blockMessage.setDataHash(ByteConvertUtil.bytesToHexString(blockInfo.getDataHash()));
+            blockMessage.setPreviousHash(ByteConvertUtil.bytesToHexString(blockInfo.getPreviousHash()));
+            blockMessage.setEnvelopeCount(blockInfo.getEnvelopeCount());
+            blockMessage.setTransactionCount(blockInfo.getTransactionCount());
+            blockMessage.setTransActionsMetaData(ByteConvertUtil.bytesToHexString(blockInfo.getTransActionsMetaData()));
+            blockList.add(blockMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            semaphore.release();
+            countDownLatch.countDown();
+        }
+    }
+
+    public BlockInfo blockChainInfoByNum(String name, String peerWithOrg, String channelName, int num) throws Exception {
+        HFClient client = HFClient.createNewInstance();
+        hyperledgerConfiguration.checkConfig(client);
+
+        Org sampleOrg = HyperledgerConfiguration.config.getSampleOrg(peerWithOrg);
+        client.setUserContext(sampleOrg.getUser(name));
+        channelService.reconstructChannel(peerWithOrg, channelName, client);
+        Channel channel = ChannelContext.get();
+
+
+        BlockInfo blockInfo = channel.queryBlockByNumber(num);
 
         return blockInfo;
     }

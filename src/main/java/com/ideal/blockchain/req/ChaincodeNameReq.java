@@ -15,13 +15,16 @@
 
 package com.ideal.blockchain.req;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 
 /**
- * @author SWATI RAJ
+ * @author
  *
  */
+@Data
 public class ChaincodeNameReq extends BaseReq {
 
 	@NotEmpty(message = "please enter peerWithOrg in request body")
@@ -36,36 +39,16 @@ public class ChaincodeNameReq extends BaseReq {
 	@NotBlank(message = "please enter chainCodeVersion in request body")
 	private String chainCodeVersion;
 
-    public String getChainCodeName() {
-        return chainCodeName;
-    }
-
-    public void setChainCodeName(String chainCodeName) {
-        this.chainCodeName = chainCodeName;
-    }
-
-	public String getPeerWithOrg() {
-		return peerWithOrg;
+	public ChaincodeNameReq() {
 	}
 
-	public void setPeerWithOrg(String peerWithOrg) {
+	public ChaincodeNameReq(@NotEmpty(message = "please enter peerWithOrg in request body") String peerWithOrg,
+							@NotBlank(message = "please enter channelName in request body") String channelName,
+							@NotBlank(message = "please enter ChainCodeName in request body") String chainCodeName,
+							@NotBlank(message = "please enter chainCodeVersion in request body") String chainCodeVersion) {
 		this.peerWithOrg = peerWithOrg;
-	}
-
-	public String getChannelName() {
-		return channelName;
-	}
-
-	public void setChannelName(String channelName) {
 		this.channelName = channelName;
-	}
-
-	public String getChainCodeVersion() {
-		return chainCodeVersion;
-	}
-
-	public void setChainCodeVersion(String chainCodeVersion) {
+		this.chainCodeName = chainCodeName;
 		this.chainCodeVersion = chainCodeVersion;
 	}
-
 }

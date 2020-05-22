@@ -14,16 +14,20 @@ package com.ideal.blockchain.dto.request;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotEmpty;
+
 /**
- * @author SWATI RAJ
- *
+ * @author
  */
 @Data
 public class UserDto {
 
-	private String userName;
-	private String passWord;
-	private String peerWithOrg;
+    @NotEmpty(message = "用户名不能为空")
+    private String userName;
+    @NotEmpty(message = "密码不能为空")
+    private String passWord;
+    @NotEmpty(message = "所属机构不能为空")
+    private String peerWithOrg;
 
-	private String collectionName;
+    private String collectionName;
 }

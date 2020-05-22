@@ -7,10 +7,7 @@ import com.ideal.blockchain.enums.ResponseCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -21,7 +18,7 @@ public class CollectionController {
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
-    public ResultInfo save(CollectionEntity entity) {
+    public ResultInfo save(@RequestBody CollectionEntity entity) {
         if (StringUtils.isEmpty(entity.getCollectionName())) {
             return new ResultInfo(ResponseCodeEnum.FAILURE, "collectionName can not null");
         }
@@ -34,7 +31,7 @@ public class CollectionController {
         }
     }
 
-    @RequestMapping(value = "/queryCollection", method = RequestMethod.POST)
+    @RequestMapping(value = "/queryCollection", method = RequestMethod.GET)
     @ResponseBody
     public ResultInfo queryCollection() {
         return new ResultInfo(ResponseCodeEnum.SUCCESS, collectionParserService.getCollectNameList());
@@ -42,7 +39,7 @@ public class CollectionController {
 
     @RequestMapping(value = "/modify", method = RequestMethod.POST)
     @ResponseBody
-    public ResultInfo modify(CollectionEntity entity) {
+    public ResultInfo modify(@RequestBody CollectionEntity entity) {
         if (StringUtils.isEmpty(entity.getCollectionName())) {
             return new ResultInfo(ResponseCodeEnum.FAILURE, "collectionName can not null");
         }

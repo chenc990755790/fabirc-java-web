@@ -12,14 +12,17 @@ import io.netty.handler.ssl.OpenSsl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperledger.fabric.example.entity.InvoiceInfo;
-import org.hyperledger.fabric.example.entity.Receivable;
 import org.hyperledger.fabric.example.entity.SettlementAccount;
+import org.hyperledger.fabric.example.entity.Receivable;
 import org.hyperledger.fabric.example.entity.UserInfo;
+import org.hyperledger.fabric.example.entity.factoring.Enterprise;
+import org.hyperledger.fabric.example.entity.factoring.Factor;
+import org.hyperledger.fabric.example.entity.factoring.AssetTransfer;
+import org.hyperledger.fabric.example.entity.factoring.ShuntData;
 import org.hyperledger.fabric.shim.ChaincodeBase;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 import org.hyperledger.fabric.shim.ledger.KeyValue;
 import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
-
 import java.util.Iterator;
 import java.util.List;
 
@@ -162,6 +165,14 @@ public class SimpleChaincode extends ChaincodeBase {
             }
             if (FUNCTION_SAVESELFPRODPAYMENT.equals(func)) {
                 return loanChainCode.saveSelfProdPayment(stub, params);
+            }
+            if (FUNCTION_SAVEFACTORING.equals(func)) {
+                return saveFactoring(stub, params);
+            }if (FUNCTION_SAVEENTERPRISE.equals(func)) {
+                return saveEnterprise(stub, params);
+            }
+            if (FUNCTION_SAVETRANSFER.equals(func)) {
+                return saveTransfer(stub, params);
             }
             return newErrorResponse("Invalid invoke function name :" + func);
         } catch (IllegalArgumentException e) {
@@ -328,6 +339,54 @@ public class SimpleChaincode extends ChaincodeBase {
 
         _logger.info("conversion  Receivable is" + userInfo);
         String key = userInfo.getObjectType() + userInfo.getReceivableRequestId();
+
+        stub.putStringState(key, args.get(0));
+        _logger.info("Transfer complete" + key);
+
+        return newSuccessResponse("invoke finished successfully:", ByteString.copyFrom(key, UTF_8).toByteArray());
+    }
+
+    private Response saveFactoring(ChaincodeStub stub, List<String> args) {
+        if (args.size() != 1) {
+            return newErrorResponse("Incorrect number of arguments. Expecting 1");
+        }
+        _logger.info("args  parameter is" + args.get(0));
+        Factor factor = gson.fromJson(args.get(0), Factor.class);
+
+        _logger.info("conversion  factor is" + factor);
+        String key = factor.getObjectType() + factor.getBlockChainReqId();
+
+        stub.putStringState(key, args.get(0));
+        _logger.info("Transfer complete" + key);
+
+        return newSuccessResponse("invoke finished successfully:", ByteString.copyFrom(key, UTF_8).toByteArray());
+    }
+
+    private Response saveEnterprise(ChaincodeStub stub, List<String> args) {
+        if (args.size() != 1) {
+            return newErrorResponse("Incorrect number of arguments. Expecting 1");
+        }
+        _logger.info("args  parameter is" + args.get(0));
+        ShuntData<Enterprise> enterprise = gson.fromJson(args.get(0), ShuntData.class);
+
+        _logger.info("conversion  enterprise is" + enterprise);
+        String key = Enterprise.OBJECT_TYPE_NAME + enterprise.getBlockChainReqId();
+
+        stub.putStringState(key, args.get(0));
+        _logger.info("Transfer complete" + key);
+
+        return newSuccessResponse("invoke finished successfully:", ByteString.copyFrom(key, UTF_8).toByteArray());
+    }
+
+    private Response saveTransfer(ChaincodeStub stub, List<String> args) {
+        if (args.size() != 1) {
+            return newErrorResponse("Incorrect number of arguments. Expecting 1");
+        }
+        _logger.info("args  parameter is" + args.get(0));
+        ShuntData<AssetTransfer> assetTransfer = gson.fromJson(args.get(0), ShuntData.class);
+
+        _logger.info("conversion  assetTransfer is" + assetTransfer);
+        String key = AssetTransfer.OBJECT_TYPE_NAME + assetTransfer.getBlockChainReqId();
 
         stub.putStringState(key, args.get(0));
         _logger.info("Transfer complete" + key);

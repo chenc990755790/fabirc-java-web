@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018, Mindtree Ltd. - All Rights Reserved. 
+ *  Copyright 2018, Mindtree Ltd. - All Rights Reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
@@ -14,34 +14,15 @@ package com.ideal.blockchain.req;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 
 /**
  * @author SWATI RAJ
- *
  */
 @Data
-public class InvokeChainCodeArgsReq extends BaseReq {
+public class InvokeChainCodeArgsReq extends QueryArgsReq {
 
-	@NotBlank(message = "please enter belongWithOrg in request body")
-	private String belongWithOrg;
-
-	@NotEmpty(message = "please enter peerWithOrgs in request body")
-	private String[] peerWithOrgs ;
-
-	@NotBlank(message = "please enter channelName in request body")
-	private String channelName;
-
-	@NotBlank(message = "please enter chainCodeVersion in request body")
-	private String chainCodeVersion;
-
-	@NotBlank(message = "please enter ChainCodeName in request body")
-	private String chainCodeName;
-
-	@NotBlank(message = "please enter functionName in request body")
-	private String function;
-
-	private String[] args;
+    @NotEmpty(message = "please enter peerWithOrgs in request body")
+    private String[] peerWithOrgs;
 
 }

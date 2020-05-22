@@ -37,6 +37,15 @@ public class HyperUser implements User, Serializable {
     private String organization;
     private String enrollmentSecret;
     Enrollment enrollment = null; //need access in test env.
+    private String companyId;
+
+    public String getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(String companyId) {
+        this.companyId = companyId;
+    }
 
     public HyperUser(String name, String org) {
         this.name = name;

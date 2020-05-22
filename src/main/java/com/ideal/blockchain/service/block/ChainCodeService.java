@@ -3,10 +3,11 @@ package com.ideal.blockchain.service.block;
 import com.ideal.blockchain.config.ChannelContext;
 import com.ideal.blockchain.config.HyperledgerConfiguration;
 import com.ideal.blockchain.model.Org;
+import com.ideal.blockchain.req.InvokeChainCodeArgsReq;
+import com.ideal.blockchain.req.QueryArgsReq;
 import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.fabric.sdk.*;
 import org.hyperledger.fabric.sdk.TransactionRequest.Type;
-import org.hyperledger.fabric.sdk.exception.TransactionEventException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +38,6 @@ public class ChainCodeService {
     private void waitOnFabric(int additional) {
 
     }
-
-
 
     public String installChaincode(String name, String peerWithOrg, String channelName,
                                    String chaincodeName, String chainCodeVersion) throws Exception {
@@ -119,7 +118,7 @@ public class ChainCodeService {
         instantiateProposalRequest.setChaincodeVersion(chainCodeVersion);
         instantiateProposalRequest.setUserContext(HyperledgerConfiguration.config.getSampleOrg(belongWithOrg).getPeerAdmin());
         instantiateProposalRequest.setChaincodeCollectionConfiguration(ChaincodeCollectionConfiguration.fromYamlFile(
-                new File(HyperledgerConfiguration.PATH + "/artifacts/PrivateDataIT.yaml") ));
+                new File(HyperledgerConfiguration.PATH + "/artifacts/PrivateDataIT.yaml")));
         Map<String, byte[]> tm = new HashMap<>();
         tm.put("HyperLedgerFabric", "InstantiateProposalRequest:JavaSDK".getBytes(UTF_8));
         tm.put("method", "InstantiateProposalRequest".getBytes(UTF_8));
@@ -171,7 +170,7 @@ public class ChainCodeService {
         if (!channel.getEventHubs().isEmpty()) {
             nOfEvents.addEventHubs(channel.getEventHubs());
         }
-        String result = channel.sendTransaction(successful, orderers,HyperledgerConfiguration.config.getSampleOrg(belongWithOrg).getPeerAdmin()).thenApply(transactionEvent -> {
+        String result = channel.sendTransaction(successful, orderers, HyperledgerConfiguration.config.getSampleOrg(belongWithOrg).getPeerAdmin()).thenApply(transactionEvent -> {
             waitOnFabric(0);
 //            BlockEvent blockEvent = transactionEvent.getBlockEvent();
 
@@ -187,33 +186,32 @@ public class ChainCodeService {
     }
 
 
-    public String invokeChaincode(String name, String belongWithOrg, String[] peerWithOrgs, String channelName, String chaincodeName,
-                                  String chaincodeFunction, String[] chaincodeArgs, String chainCodeVersion) throws Exception {
+    public String invokeChaincode(InvokeChainCodeArgsReq req) throws Exception {
 
         HFClient client = HFClient.createNewInstance();
         hyperledgerConfiguration.checkConfig(client);
 
-        client.setUserContext(HyperledgerConfiguration.config.getSampleOrg(belongWithOrg).getPeerAdmin());
+        client.setUserContext(HyperledgerConfiguration.config.getSampleOrg(req.getPeerWithOrg()).getPeerAdmin());
 
-        ChaincodeID chaincodeID = hyperledgerConfiguration.getChaincodeId(chaincodeName, chainCodeVersion);
-        channelService.reconstructChannel(peerWithOrgs, channelName, client);
+        ChaincodeID chaincodeID = hyperledgerConfiguration.getChaincodeId(req.getChainCodeName(), req.getChainCodeVersion());
+        channelService.reconstructChannel(req.getPeerWithOrgs(), req.getChannelName(), client);
         Channel channel = ChannelContext.get();
 
-        log.info("Running channel " + channelName);
+        log.info("Running channel " + req.getChannelName());
 
 
-        log.debug("chaincodeFunction" + chaincodeFunction);
-        log.debug("chaincodeArgs" + chaincodeArgs);
+        log.debug("chaincodeFunction" + req.getFunction());
+        log.debug("chaincodeArgs" + req.getArgs());
 
 
         TransactionProposalRequest transactionProposalRequest = client.newTransactionProposalRequest();
         transactionProposalRequest.setChaincodeID(chaincodeID);
         transactionProposalRequest.setChaincodeLanguage(CHAIN_CODE_LANG);
-        transactionProposalRequest.setFcn(chaincodeFunction);
+        transactionProposalRequest.setFcn(req.getFunction());
         transactionProposalRequest.setProposalWaitTime(HyperledgerConfiguration.config.getProposalWaitTime());
-        transactionProposalRequest.setArgs(chaincodeArgs);
-        transactionProposalRequest.setChaincodeVersion(chainCodeVersion);
-        transactionProposalRequest.setUserContext(HyperledgerConfiguration.config.getSampleOrg(belongWithOrg).getUser(name));
+        transactionProposalRequest.setArgs(req.getArgs());
+        transactionProposalRequest.setChaincodeVersion(req.getChainCodeVersion());
+        transactionProposalRequest.setUserContext(HyperledgerConfiguration.config.getSampleOrg(req.getPeerWithOrg()).getUser(req.getUserName()));
 
 //        ChaincodeEndorsementPolicy chaincodeEndorsementPolicy = new ChaincodeEndorsementPolicy();
 //        chaincodeEndorsementPolicy
@@ -230,7 +228,7 @@ public class ChainCodeService {
 
         transactionProposalRequest.setTransientMap(tm2);
 
-        log.info("sending transactionProposal to all peers with arguments: " + chaincodeFunction + "," + chaincodeArgs);
+        log.info("sending transactionProposal to all peers with arguments: " + req.getFunction() + "," + req.getArgs());
         Collection<ProposalResponse> transactionPropResp = channel.sendTransactionProposal(transactionProposalRequest, channel.getPeers());
         for (ProposalResponse response : transactionPropResp) {
             if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
@@ -271,77 +269,44 @@ public class ChainCodeService {
 
         ////////////////////////////
         // Send Transaction Transaction to orderer
-        log.info("Sending chaincode transaction " + chaincodeName + "_" + chaincodeFunction + " to orderer.");
-        log.info("transactionID==>"+resp.getTransactionID());
+        log.info("Sending chaincode transaction " + req.getChainCodeName() + "_" + req.getChainCodeVersion() + " to orderer.");
+        log.info("transactionID==>" + resp.getTransactionID());
         String result = "";
-        try{
-            BlockEvent.TransactionEvent event =  channel.sendTransaction(successful).get(HyperledgerConfiguration.config.getTransactionWaitTime()
+        try {
+            BlockEvent.TransactionEvent event = channel.sendTransaction(successful).get(HyperledgerConfiguration.config.getTransactionWaitTime()
                     , TimeUnit.SECONDS);
             //������ɹ�
             if (event.isValid()) {
-                log.info("���ﴦ��ɹ�");
-                result= "Transaction invoked successfully";
+                result = resp.getTransactionID();
             } else {
-                log.info("���ﴦ��ʧ��");
-                result= "Transaction invoked Failed";
+                result = "Transaction invoked Failed";
             }
-        }catch (Exception e){
-            log.error("IntermediateChaincodeID==>toOrdererResponse==>Exception:"+e.getMessage());
-            result= "Transaction invoked Error";
+        } catch (Exception e) {
+            log.error("IntermediateChaincodeID==>toOrdererResponse==>Exception:" + e.getMessage());
+            result = "Transaction invoked Error";
         }
-
-
-
-//        String result = channel.sendTransaction(successful,HyperledgerConfiguration.config.getSampleOrg(belongWithOrg).getUser(name)).thenApply(transactionEvent -> {
-//
-//            waitOnFabric(0);
-//
-//            log.info("transaction event is valid " + transactionEvent.isValid()); // must
-//            for (BlockInfo.TransactionEnvelopeInfo.TransactionActionInfo info : transactionEvent.getTransactionActionInfos()) {
-//                log.info("*************" + info.getResponseMessage());
-//            }
-//            // be
-//            // valid
-//            // to
-//            // be
-//            // here.
-//            log.info("Finished invoke transaction with transaction id " + transactionEvent.getTransactionID());
-//
-//            return "Transaction invoked successfully";
-//        }).exceptionally(e -> {
-//            if (e instanceof TransactionEventException) {
-//                BlockEvent.TransactionEvent te = ((TransactionEventException) e).getTransactionEvent();
-//                if (te != null) {
-//                    log.error(format("Transaction with txid " + te.getTransactionID() + " failed. " + e.getMessage()));
-//                }
-//            }
-//
-//            log.error("failed with " + e.getClass().getName() + " exception " + e.getMessage());
-//            return "failed with " + e.getClass().getName() + " exception " + e.getMessage();
-//        }).get(HyperledgerConfiguration.config.getTransactionWaitTime(), TimeUnit.SECONDS);
         log.info("Transaction invoked " + result);
-
         return result;
     }
 
 
-    public String queryChainCode(String name, String peerWithOrg, String channelName, String chaincodeName, String chaincodeFunction, String[] chaincodeArgs, String chainCodeVersion) throws Exception {
+    public String queryChainCode(QueryArgsReq req) throws Exception {
         HFClient client = HFClient.createNewInstance();
         hyperledgerConfiguration.checkConfig(client);
-        client.setUserContext(HyperledgerConfiguration.config.getSampleOrg(peerWithOrg).getPeerAdmin());
+        client.setUserContext(HyperledgerConfiguration.config.getSampleOrg(req.getPeerWithOrg()).getPeerAdmin());
 
-        ChaincodeID chaincodeID = hyperledgerConfiguration.getChaincodeId(chaincodeName, chainCodeVersion);
-        channelService.reconstructChannel(peerWithOrg, channelName, client);
+        ChaincodeID chaincodeID = hyperledgerConfiguration.getChaincodeId(req.getChainCodeName(), req.getChainCodeVersion());
+        channelService.reconstructChannel(req.getPeerWithOrg(), req.getChannelName(), client);
         Channel channel = ChannelContext.get();
 
-        log.info("Running channel " + channelName);
+        log.info("Running channel " + req.getChannelName());
         QueryByChaincodeRequest queryByChaincodeRequest = client.newQueryProposalRequest();
-        queryByChaincodeRequest.setArgs(chaincodeArgs);
-        queryByChaincodeRequest.setFcn(chaincodeFunction);
+        queryByChaincodeRequest.setArgs(req.getArgs());
+        queryByChaincodeRequest.setFcn(req.getFunction());
         queryByChaincodeRequest.setChaincodeID(chaincodeID);
-        queryByChaincodeRequest.setChaincodeVersion(chainCodeVersion);
+        queryByChaincodeRequest.setChaincodeVersion(req.getChainCodeVersion());
         queryByChaincodeRequest.setChaincodeLanguage(CHAIN_CODE_LANG);
-        queryByChaincodeRequest.setUserContext(HyperledgerConfiguration.config.getSampleOrg(peerWithOrg).getUser(name));
+        queryByChaincodeRequest.setUserContext(HyperledgerConfiguration.config.getSampleOrg(req.getPeerWithOrg()).getUser(req.getUserName()));
 
         Map<String, byte[]> tm2 = new HashMap<>();
         tm2.put("HyperLedgerFabric", "QueryByChaincodeRequest:JavaSDK".getBytes(UTF_8));
@@ -367,17 +332,15 @@ public class ChainCodeService {
     }
 
 
-    public String updateChaincode(String name, String belongWithOrg, String[] peerWithOrgs, String channelName, String chaincodeName, String chaincodeFunction, String[] chaincodeArgs, String chainCodeVersion) throws Exception {
+    public String updateChaincode(InvokeChainCodeArgsReq req) throws Exception {
         HFClient client = HFClient.createNewInstance();
         hyperledgerConfiguration.checkConfig(client);
-        client.setUserContext(HyperledgerConfiguration.config.getSampleOrg(belongWithOrg).getPeerAdmin());
-        ChaincodeID chaincodeID = hyperledgerConfiguration.getChaincodeId(chaincodeName, chainCodeVersion);
-        channelService.reconstructChannel(peerWithOrgs, channelName, client);
+        client.setUserContext(HyperledgerConfiguration.config.getSampleOrg(req.getPeerWithOrg()).getPeerAdmin());
+        ChaincodeID chaincodeID = hyperledgerConfiguration.getChaincodeId(req.getChainCodeName(), req.getChainCodeVersion());
+        channelService.reconstructChannel(req.getPeerWithOrgs(), req.getChannelName(), client);
         Channel channel = ChannelContext.get();
 
-
-        log.info("Running channel " + channelName);
-
+        log.info("Running channel " + req.getChannelName());
 
         Collection<Orderer> orderers = channel.getOrderers();
 
@@ -385,10 +348,10 @@ public class ChainCodeService {
         upgradeProposalRequest.setProposalWaitTime(HyperledgerConfiguration.config.getProposalWaitTime());
         upgradeProposalRequest.setChaincodeID(chaincodeID);
         upgradeProposalRequest.setChaincodeLanguage(CHAIN_CODE_LANG);
-        upgradeProposalRequest.setFcn(chaincodeFunction);
-        upgradeProposalRequest.setArgs(chaincodeArgs);
-        upgradeProposalRequest.setChaincodeVersion(chainCodeVersion);
-        upgradeProposalRequest.setUserContext(HyperledgerConfiguration.config.getSampleOrg(belongWithOrg).getPeerAdmin());
+        upgradeProposalRequest.setFcn(req.getFunction());
+        upgradeProposalRequest.setArgs(req.getArgs());
+        upgradeProposalRequest.setChaincodeVersion(req.getChainCodeVersion());
+        upgradeProposalRequest.setUserContext(HyperledgerConfiguration.config.getSampleOrg(req.getPeerWithOrg()).getPeerAdmin());
 
         Map<String, byte[]> tm = new HashMap<>();
         tm.put("HyperLedgerFabric", "UpgradeProposalRequest:JavaSDK".getBytes(UTF_8));
@@ -400,12 +363,12 @@ public class ChainCodeService {
                 .fromYamlFile(new File(HyperledgerConfiguration.PATH + "/artifacts/chaincodeendorsementpolicy.yaml"));
         upgradeProposalRequest.setChaincodeEndorsementPolicy(chaincodeEndorsementPolicy);
         upgradeProposalRequest.setChaincodeCollectionConfiguration(ChaincodeCollectionConfiguration.fromYamlFile(
-                new File(HyperledgerConfiguration.PATH + "/artifacts/PrivateDataIT.yaml") ));
+                new File(HyperledgerConfiguration.PATH + "/artifacts/PrivateDataIT.yaml")));
         Collection<ProposalResponse> responses;
         Collection<ProposalResponse> successful = new LinkedList<>();
         Collection<ProposalResponse> failed = new LinkedList<>();
 
-        log.info("Sending instantiateProposalRequest to all peers with arguments: " + chaincodeArgs);
+        log.info("Sending instantiateProposalRequest to all peers with arguments: " + req.getArgs());
         successful.clear();
         failed.clear();
         responses = channel.sendUpgradeProposal(upgradeProposalRequest, channel.getPeers());
@@ -441,7 +404,7 @@ public class ChainCodeService {
         if (!channel.getEventHubs().isEmpty()) {
             nOfEvents.addEventHubs(channel.getEventHubs());
         }
-        channel.sendTransaction(successful, orderers,HyperledgerConfiguration.config.getSampleOrg(belongWithOrg).getPeerAdmin()).thenApply(transactionEvent -> {
+        channel.sendTransaction(successful, orderers, HyperledgerConfiguration.config.getSampleOrg(req.getPeerWithOrg()).getPeerAdmin()).thenApply(transactionEvent -> {
             waitOnFabric(0);
             BlockEvent blockEvent = transactionEvent.getBlockEvent();
             log.info("Finished update transaction with transaction id " + transactionEvent.getTransactionID());

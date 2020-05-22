@@ -25,10 +25,10 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org1
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/8d008efaae3f39a58100a49435966bfbba0c867bccbf84413844015971cef923_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/86f7afc6317b6bedaa1467e8d598b61c5d18dcfd3b71a0f2cee90a1a18686d67_sk
       - FABRIC_CA_SERVER_TLS_ENABLED=false
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
-      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/8d008efaae3f39a58100a49435966bfbba0c867bccbf84413844015971cef923_sk
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/86f7afc6317b6bedaa1467e8d598b61c5d18dcfd3b71a0f2cee90a1a18686d67_sk
     ports:
       - "7054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
@@ -42,10 +42,10 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org2
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/afc8a309a0abcf1b1683c9cd41de7885e8235737212d0727a1cce2915cbecb57_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/bb4f2776fccd6e6617c08db46a5f8c1c6e5d5a211a362688322018999730884f_sk
       - FABRIC_CA_SERVER_TLS_ENABLED=false
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem
-      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/afc8a309a0abcf1b1683c9cd41de7885e8235737212d0727a1cce2915cbecb57_sk
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/bb4f2776fccd6e6617c08db46a5f8c1c6e5d5a211a362688322018999730884f_sk
     ports:
       - "8054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
@@ -87,7 +87,8 @@ services:
       service: peer0.org2.example.com
     networks:
       - byfn
-
+    depends_on:
+      - couchdb1
   peer1.org2.example.com:
     container_name: peer1.org2.example.com
     extends:
@@ -105,6 +106,21 @@ services:
       - COUCHDB_PASSWORD=
     ports:
       - 5984:5984
+    networks:
+      - byfn
+
+  couchdb1:
+    container_name: couchdb1
+    image: hyperledger/fabric-couchdb
+    # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+    # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+    environment:
+      - COUCHDB_USER=
+      - COUCHDB_PASSWORD=
+    ports:
+      - 5985:5985
+    networks:
+      - byfn
   cli:
     container_name: cli
     image: hyperledger/fabric-tools

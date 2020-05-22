@@ -1,0 +1,91 @@
+{
+  "network-configs": {
+    "kafka-prod_default": {
+      "version": "1.0",
+      "clients": {
+        "client-1": {
+          "tlsEnable": false,
+          "organization": "Org1MSP",
+          "channel": "bhfaechannel",
+          "credentialStore": {
+            "path": "./tmp/credentialStore_Org1/credential",
+            "cryptoStore": {
+              "path": "./tmp/credentialStore_Org1/crypto"
+            }
+          }
+        }
+      },
+      "channels": {
+        "bhfaechannel": {
+          "peers": {
+            "peer0.org1.example.com": {}
+          },
+          "connection": {
+            "timeout": {
+              "peer": {
+                "endorser": "6000",
+                "eventHub": "6000",
+                "eventReg": "6000"
+              }
+            }
+          }
+        }
+      },
+      "organizations": {
+        "Org1MSP": {
+          "mspid": "Org1MSP",
+          "fullpath": true,
+           "adminPrivateKey": {
+            "path": "/root/kafka-prod/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/dafdd35b44fbca883404cb5d6957e74a3377d447615245145e7bdfc27ebbf816_sk"
+          },
+          "signedCert": {
+            "path": "/root/kafka-prod/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem"
+          }
+        },
+        "Org2MSP": {
+          "mspid": "Org2MSP",
+	      "fullpath": true,
+          "adminPrivateKey": {
+            "path": "/root/kafka-prod/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/1592f268dce6d0fbdd29c9bacca201a718eae58735f92a13e960aa8d8846242a_sk"
+          }
+        },
+        "OrdererMSP": {
+          "mspid": "OrdererMSP",
+ 	      "fullpath": true,
+          "adminPrivateKey": {
+            "path": "/root/kafka-prod/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp/keystore/64a0c60da8c665a54cda451aab6c898d468e485da5a5848f163c21e82d1fe249_sk"
+          }
+        }
+      },
+      "peers": {
+        "peer0.org1.example.com": {
+          "tlsCACerts": {
+            "path": "/root/kafka-prod/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt"
+          },
+          "url": "grpc://10.0.15.35:7051",
+          "eventUrl": "grpc://10.0.15.35:7053",
+          "grpcOptions": {
+            "ssl-target-name-override": "peer0.org1.example.com"
+          }
+        },
+        "peer1.org1.example.com": {
+          "url": "grpc://10.0.15.35:8051"
+        },
+        "peer0.org2.example.com": {
+          "url": "grpc://10.0.15.23:9051"
+        },
+        "peer1.org2.example.com": {
+          "url": "grpc://10.0.15.23:10051"
+        }
+      },
+      "orderers": {
+        "orderer.example.com": {
+          "url": "grpc://localhost:7050"
+        }
+      }
+    },
+    "network-2": {}
+  },
+  "configtxgenToolPath": "/usr/local/bin",
+  "license": "Apache-2.0"
+}

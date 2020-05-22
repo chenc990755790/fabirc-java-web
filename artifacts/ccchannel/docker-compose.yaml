@@ -98,7 +98,7 @@ services:
       - COUCHDB_USER=
       - COUCHDB_PASSWORD=
     ports:
-      - 5984:5984
+      - "5984:5984"
 
   peer1.org1.example.com:
     container_name: peer1.org1.example.com

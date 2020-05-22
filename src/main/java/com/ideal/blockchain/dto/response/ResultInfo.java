@@ -12,6 +12,16 @@ public class ResultInfo<T>  implements java.io.Serializable{
 
     private String msg;
 
+    private long totalSize;
+
+    public long getTotalSize() {
+        return totalSize;
+    }
+
+    public void setTotalSize(long totalSize) {
+        this.totalSize = totalSize;
+    }
+
     public String getCode() {
         return code;
     }
@@ -37,7 +47,7 @@ public class ResultInfo<T>  implements java.io.Serializable{
     }
 
     public ResultInfo(){
-        
+
     }
 
     public ResultInfo(ResponseCodeEnum responseCodeEnum){
@@ -49,6 +59,13 @@ public class ResultInfo<T>  implements java.io.Serializable{
         this.data = data;
         this.code = responseCodeEnum.getCode();
         this.msg = responseCodeEnum.getDesc();
+    }
+
+    public ResultInfo(ResponseCodeEnum responseCodeEnum,T data,long totalSize){
+        this.data = data;
+        this.code = responseCodeEnum.getCode();
+        this.msg = responseCodeEnum.getDesc();
+        this.totalSize = totalSize;
     }
 
     public ResultInfo(String code, String msg){
